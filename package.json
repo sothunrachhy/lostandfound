@@ -4,12 +4,12 @@
   "description": "Lost and Found Management System - Dual Portal Architecture",
   "main": "index.js",
   "scripts": {
-    "build:client": "vite build --config client/vite.config.js",
-    "build:admin": "vite build --config admin/vite.config.js",
+    "build:client": "npm run build --prefix client",
+    "build:admin": "npm run build --prefix admin",
     "build": "npm run build:client && npm run build:admin",
     "dev:server": "node server/server.js",
-    "dev:client": "vite --config client/vite.config.js",
-    "dev:admin": "vite --config admin/vite.config.js",
+    "dev:client": "npm run dev --prefix client",
+    "dev:admin": "npm run dev --prefix admin",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\"",
     "start": "node server/server.js",
     "test": "echo \"No tests specified\" && exit 1"

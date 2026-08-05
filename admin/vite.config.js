@@ -4,8 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  root: './admin',
-  cacheDir: '../node_modules/.vite-admin',
   server: {
     host: true,
     port: 3001,
@@ -15,8 +13,5 @@ export default defineConfig({
         changeOrigin: true
       }
     }
-  },
-  build: {
-    outDir: '../dist/admin'
   }
 });
