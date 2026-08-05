@@ -12,6 +12,23 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    message: 'LF System API is running serverlessly on Vercel!',
+    database: 'Neon PostgreSQL',
+    endpoints: [
+      '/api/lost-items',
+      '/api/found-items',
+      '/api/categories',
+      '/api/locations',
+      '/api/claims',
+      '/api/messages',
+      '/api/users'
+    ]
+  });
+});
+
 // ── Helper ────────────────────────────────────────────────────────
 const q = (text, params) => pool.query(text, params);
 
