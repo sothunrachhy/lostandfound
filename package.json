@@ -1,0 +1,38 @@
+{
+  "name": "lf-system",
+  "version": "2.0.0",
+  "description": "Lost and Found Management System - Dual Portal Architecture",
+  "main": "index.js",
+  "scripts": {
+    "build:client": "vite build --config client/vite.config.js",
+    "build:admin": "vite build --config admin/vite.config.js",
+    "build": "npm run build:client && npm run build:admin",
+    "dev:server": "node server/server.js",
+    "dev:client": "vite --config client/vite.config.js",
+    "dev:admin": "vite --config admin/vite.config.js",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\"",
+    "start": "node server/server.js",
+    "test": "echo \"No tests specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1103.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "lucide-react": "^1.27.0",
+    "pg": "^8.22.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "concurrently": "^10.0.4",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.1.5"
+  }
+}
