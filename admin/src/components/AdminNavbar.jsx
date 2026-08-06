@@ -56,18 +56,29 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
 
           <button
             onClick={onOpenProfile}
-            className="w-full flex items-center gap-2.5 px-3 py-2 mt-1 bg-slate-50 hover:bg-teal-50 border border-slate-100 hover:border-teal-200 rounded-xl transition-all cursor-pointer text-left group"
+            className="w-full flex items-center justify-between p-2.5 mt-1 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all cursor-pointer group"
+            title="Edit Profile"
           >
-            <div className="w-7 h-7 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
-              {currentAdmin.ProfileImage ? (
-                <img src={currentAdmin.ProfileImage} alt="" className="w-full h-full object-cover" />
-              ) : (
-                currentAdmin.Name?.charAt(0).toUpperCase() || 'A'
-              )}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-2xs border border-teal-600">
+                {currentAdmin.ProfileImage ? (
+                  <img src={currentAdmin.ProfileImage} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  currentAdmin.Name?.charAt(0).toUpperCase() || 'A'
+                )}
+              </div>
+              <div className="min-w-0 text-left">
+                <p className="text-xs font-bold text-slate-800 group-hover:text-teal-700 transition-colors truncate leading-tight">
+                  {currentAdmin.Name}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+                  Administrator
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-slate-700 group-hover:text-teal-800 truncate">{currentAdmin.Name}</p>
-              <p className="text-[10px] text-teal-600 font-semibold truncate">Edit Admin Profile ⚙️</p>
+
+            <div className="p-1 rounded-lg text-slate-400 group-hover:text-slate-600 group-hover:bg-white transition-colors shrink-0">
+              <Settings className="w-3.5 h-3.5" />
             </div>
           </button>
         </div>
