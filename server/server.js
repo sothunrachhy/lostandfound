@@ -90,7 +90,12 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 app.put('/api/users/profile', async (req, res) => {
-  const { UserID, Name, Phone, StudentID, ProfileImage } = req.body;
+  const UserID = req.body.UserID || req.body.userId || req.body.user_id;
+  const Name = req.body.Name || req.body.name;
+  const Phone = req.body.Phone || req.body.phone || '';
+  const StudentID = req.body.StudentID || req.body.studentId || req.body.student_id || '';
+  const ProfileImage = req.body.ProfileImage || req.body.profileImage || '';
+
   if (!UserID || !Name) return res.status(400).json({ success: false, message: 'UserID and Name required' });
   try {
     let avatar = ProfileImage || '';
@@ -103,11 +108,11 @@ app.put('/api/users/profile', async (req, res) => {
        SET name = $1, phone = $2, student_id = $3, profile_image = COALESCE(NULLIF($4, ''), profile_image)
        WHERE user_id = $5
        RETURNING user_id, student_id, name, email, phone, role_id, profile_image`,
-      [Name, Phone || '', StudentID || '', avatar, UserID]
+      [Name, Phone, StudentID, avatar, UserID]
     );
     if (rows.length === 0) return res.status(404).json({ success: false, message: 'User not found' });
     const user = rows[0];
-    user.role_name = 'User';
+    user.role_name = user.role_id === 2 ? 'Admin' : 'User';
     res.json({ success: true, message: 'Profile updated!', user: sanitizeUser(user) });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });

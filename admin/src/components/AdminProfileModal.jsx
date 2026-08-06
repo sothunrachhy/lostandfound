@@ -23,10 +23,10 @@ export default function AdminProfileModal({ isOpen, onClose, currentAdmin, onSav
   const handleSubmit = (e) => {
     e.preventDefault();
     onSaveProfile({
-      userId: currentAdmin.UserID,
-      name: form.name,
-      phone: form.phone,
-      profileImage: form.profileImage
+      UserID: currentAdmin.UserID || currentAdmin.user_id,
+      Name: form.name,
+      Phone: form.phone,
+      ProfileImage: form.profileImage
     });
     onClose();
   };
