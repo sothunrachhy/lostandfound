@@ -373,7 +373,7 @@ function AuthPage({ onLogin, onRegister }) {
             </svg>
           </div>
           <h1 className="text-2xl font-black text-slate-800">LF SYSTEM</h1>
-          <p className="text-slate-400 text-xs">Student Portal — Campus Lost & Found</p>
+          <p className="text-slate-400 text-xs">Student — Campus Lost & Found</p>
         </div>
 
         {/* Toggle */}

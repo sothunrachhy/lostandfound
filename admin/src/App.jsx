@@ -154,7 +154,7 @@ function AdminLoginPage({ onLogin }) {
             </svg>
           </div>
           <h1 className="text-2xl font-black text-slate-900">LF SYSTEM</h1>
-          <p className="text-slate-400 text-xs">Admin Portal — Campus Safety Office</p>
+          <p className="text-slate-400 text-xs">Admin — Campus Safety Office</p>
         </div>
 
         <form className="space-y-3.5" onSubmit={e => { e.preventDefault(); onLogin(form); }}>
@@ -166,15 +166,10 @@ function AdminLoginPage({ onLogin }) {
             <label className="block text-xs font-bold text-slate-600 mb-1.5">Password</label>
             <input type="password" className="admin-input" placeholder="••••••••" value={form.password} onChange={set('password')} required />
           </div>
-          <button type="submit" className="btn-admin w-full py-2.5 rounded-xl text-sm justify-center">
-            Access Admin Portal
+          <button type="submit" className="btn-admin w-full py-2.5 rounded-xl text-sm justify-center font-bold">
+            Access Admin
           </button>
         </form>
-
-        <div className="text-xs text-slate-400 text-center border-t border-slate-100 pt-4 space-y-1">
-          <p>Demo: <span className="font-mono text-teal-700">admin.safety@university.edu</span></p>
-          <p>Password: <span className="font-mono text-slate-600">adminpassword</span></p>
-        </div>
 
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
           <p className="text-[10px] text-amber-700 font-semibold">🔒 Restricted to authorized campus safety personnel only</p>
