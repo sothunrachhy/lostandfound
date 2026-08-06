@@ -163,7 +163,7 @@ export function ReportModal({ isOpen, onClose, mode, categories, locations, curr
         <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer"><X className="w-4 h-4" /></button>
         <div>
           <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full ${mode === 'lost' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
-            {mode === 'lost' ? '⚠ Report Lost Item' : '✓ Report Found Item'}
+            {mode === 'lost' ? 'Report Lost Item' : 'Report Found Item'}
           </span>
           <h2 className="text-xl font-black text-slate-800 mt-2">{mode === 'lost' ? 'What did you lose?' : 'What did you find?'}</h2>
           <p className="text-xs text-slate-400 mt-0.5">Accurate details help find matches faster.</p>
@@ -687,7 +687,7 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
             <span className={`text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md ${
               isFound ? 'bg-teal-600 text-white' : 'bg-rose-600 text-white'
             }`}>
-              {isFound ? '✓ Found Item' : '🔍 Lost Item'}
+              {isFound ? 'Found Item' : 'Lost Item'}
             </span>
             <span className={`text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md ${
               item.Status === 'Claimed' ? 'bg-amber-600 text-white' : 'bg-emerald-600 text-white'

@@ -206,7 +206,7 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 <ItemImage src={item.Image} alt={item.ItemName} type="lost" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                 <span className="badge-lost absolute top-3 left-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">
-                  ⚠ {t.statusLost}
+                  {t.statusLost}
                 </span>
                 {item.Status === 'Claimed' && (
                   <span className="badge-claimed absolute top-3 right-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">{t.statusClaimed}</span>
@@ -253,7 +253,7 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 <ItemImage src={item.Image} alt={item.ItemName} type="found" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                 <span className="badge-found absolute top-3 left-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">
-                  ✓ {t.statusFound} Item
+                  {t.statusFound} Item
                 </span>
                 {item.Status === 'Claimed'
                   ? <span className="badge-claimed absolute top-3 right-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">{t.statusClaimed}</span>
