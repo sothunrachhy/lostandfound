@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle } from 'lucide-react';
+import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search } from 'lucide-react';
 
 const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
   const reader = new FileReader();
@@ -290,6 +290,8 @@ export function ClaimModal({ isOpen, onClose, foundItem, lostItem, currentUser, 
 
 export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, allUsers, onSelectRecipient, onSend, onFetchMessages, onApproveDirect }) {
   const [text, setText] = useState('');
+  const [searchContact, setSearchContact] = useState('');
+  const [showContactList, setShowContactList] = useState(false);
   const messagesEndRef = React.useRef(null);
 
   const scrollToBottom = () => {
@@ -319,71 +321,151 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
     setText('');
   };
 
+  const filteredUsers = (allUsers || []).filter(u =>
+    u.Name.toLowerCase().includes(searchContact.toLowerCase()) ||
+    (u.RoleName && u.RoleName.toLowerCase().includes(searchContact.toLowerCase()))
+  );
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex justify-end">
-      <div className="drawer w-full max-w-sm h-full flex flex-col">
+    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex justify-end">
+      <div className="drawer w-full max-w-md h-full flex flex-col bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 p-4 bg-white">
-          <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-2">
-            <MessageSquare className="w-5 h-5 text-teal-700 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-800">Chat</p>
-              {allUsers && allUsers.length > 0 ? (
-                <select
-                  value={recipient?.UserID || ''}
-                  onChange={(e) => {
-                    const u = allUsers.find(x => x.UserID === parseInt(e.target.value, 10));
-                    if (u) onSelectRecipient(u);
-                  }}
-                  className="text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-lg px-2 py-0.5 mt-0.5 cursor-pointer max-w-full truncate"
-                >
-                  {allUsers.map(u => (
-                    <option key={u.UserID} value={u.UserID}>
-                      with {u.Name} ({u.RoleName})
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <p className="text-[10px] text-slate-400">with {recipient?.Name || 'User'}</p>
-              )}
+        <div className="flex items-center justify-between border-b border-slate-100 p-4 bg-white shrink-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            {recipient ? (
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="relative shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-teal-700 text-white font-bold text-sm flex items-center justify-center shadow-xs">
+                    {recipient.Name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-sm font-bold text-slate-800 truncate">{recipient.Name}</h4>
+                  <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                    recipient.RoleName === 'Admin' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-teal-50 text-teal-700 border border-teal-200'
+                  }`}>
+                    {recipient.RoleName || 'User'}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-teal-700" />
+                <h4 className="text-sm font-bold text-slate-800">Messages</h4>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => setShowContactList(!showContactList)}
+              className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                showContactList ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+              title="All Contacts"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Contacts</span>
+            </button>
+
+            <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Messenger Contact Selector Bar / List */}
+        {(showContactList || !recipient) && (
+          <div className="bg-slate-50 border-b border-slate-200 p-3 space-y-2.5 shrink-0 animate-in slide-in-from-top duration-200">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search people or role..."
+                value={searchContact}
+                onChange={e => setSearchContact(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-teal-600 shadow-xs"
+              />
+            </div>
+
+            {/* Horizontal Contacts Avatar Row */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-1 pt-1 scrollbar-none">
+              {filteredUsers.map(u => {
+                const isSelected = recipient?.UserID === u.UserID;
+                return (
+                  <button
+                    key={u.UserID}
+                    onClick={() => {
+                      onSelectRecipient(u);
+                      setShowContactList(false);
+                    }}
+                    className={`flex flex-col items-center gap-1 min-w-[60px] cursor-pointer group transition-transform active:scale-95`}
+                  >
+                    <div className={`relative w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-xs transition-all ${
+                      isSelected ? 'bg-teal-700 text-white ring-2 ring-teal-600 ring-offset-2' : 'bg-white text-slate-700 border border-slate-200 group-hover:border-teal-500'
+                    }`}>
+                      {u.Name?.charAt(0).toUpperCase()}
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                    </div>
+                    <span className={`text-[10px] truncate max-w-[64px] font-medium ${isSelected ? 'text-teal-800 font-bold' : 'text-slate-600'}`}>
+                      {u.Name?.split(' ')[0]}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        )}
 
         {/* Handover Banner */}
         {recipient && onApproveDirect && (
           <div className="bg-emerald-50 border-b border-emerald-100 px-4 py-2 flex items-center justify-between gap-2 shrink-0">
             <span className="text-[11px] font-semibold text-emerald-800">Done talking & handed over item?</span>
             <button onClick={() => onApproveDirect(null, recipient.UserID)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-2.5 rounded-lg shrink-0 cursor-pointer transition-colors shadow-xs">
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-2.5 rounded-xl shrink-0 cursor-pointer transition-colors shadow-xs active:scale-95">
               Confirm Handover
             </button>
           </div>
         )}
 
         {/* Message Thread */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60">
           {!recipient ? (
-            <div className="text-center py-16 space-y-2">
-              <p className="text-xs font-semibold text-slate-500">No other users registered yet.</p>
-              <p className="text-[10px] text-slate-400">When another student or admin signs up, you can chat with them here!</p>
+            <div className="text-center py-20 space-y-3">
+              <div className="w-12 h-12 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center mx-auto shadow-inner">
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-700">Select a Contact</p>
+                <p className="text-xs text-slate-400 max-w-xs mx-auto">Pick a student or admin from the contact list above to start chatting instantly.</p>
+              </div>
             </div>
           ) : messages.length === 0 ? (
-            <div className="text-center py-16 space-y-1">
-              <p className="text-xs text-slate-500 font-semibold">No messages yet with {recipient.Name}.</p>
-              <p className="text-[10px] text-slate-400">Type a message below to start the conversation.</p>
+            <div className="text-center py-20 space-y-2">
+              <div className="w-12 h-12 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center mx-auto shadow-inner">
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <p className="text-xs text-slate-600 font-semibold">Start conversation with {recipient.Name}</p>
+              <p className="text-[10px] text-slate-400">Say hi or ask about your lost item below.</p>
             </div>
           ) : (
             messages.map((m, i) => {
               const isMe = m.SenderID === currentUser.UserID;
               return (
-                <div key={i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-2xl text-xs ${isMe ? 'bg-teal-700 text-white rounded-br-none shadow-sm' : 'bg-white text-slate-700 border border-slate-200 rounded-bl-none shadow-sm'}`}>
-                    <p className="leading-relaxed">{m.MessageText}</p>
-                    <span className="text-[9px] opacity-65 block text-right mt-1 font-mono">
+                <div key={i} className={`flex gap-2 items-end ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  {!isMe && (
+                    <div className="w-6 h-6 rounded-full bg-slate-300 text-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 mb-0.5">
+                      {recipient.Name?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className={`max-w-[78%] p-3 rounded-2xl text-xs leading-relaxed ${
+                    isMe
+                      ? 'bg-teal-700 text-white rounded-br-xs shadow-sm'
+                      : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-xs'
+                  }`}>
+                    <p>{m.MessageText}</p>
+                    <span className={`text-[9px] block text-right mt-1 font-mono ${isMe ? 'text-teal-200' : 'text-slate-400'}`}>
                       {new Date(m.Timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -395,15 +477,15 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
         </div>
 
         {/* Send Input */}
-        <form onSubmit={handleSend} className="flex gap-2 p-4 border-t border-slate-100 bg-white">
+        <form onSubmit={handleSend} className="flex gap-2 p-3.5 border-t border-slate-100 bg-white shrink-0">
           <input
             value={text}
             onChange={e => setText(e.target.value)}
-            placeholder={recipient ? `Message ${recipient.Name.split(' ')[0]}...` : "Select a contact first..."}
+            placeholder={recipient ? `Message ${recipient.Name.split(' ')[0]}...` : "Select a contact above to message..."}
             disabled={!recipient}
-            className="input-field flex-1"
+            className="input-field flex-1 text-xs"
           />
-          <button type="submit" disabled={!recipient || !text.trim()} className="btn-primary p-2.5 rounded-xl cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="submit" disabled={!recipient || !text.trim()} className="btn-primary px-3.5 py-2.5 rounded-xl cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
             <Send className="w-4 h-4" />
           </button>
         </form>
