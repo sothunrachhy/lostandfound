@@ -119,16 +119,15 @@ async function setup() {
         ('Other Items')
     `);
 
-    // Locations (Royal University of Phnom Penh)
+    // Locations
     await client.query(`
       INSERT INTO locations (location_name) VALUES
-        ('RUPP Campus 1 — Building A (Humanities)'),
-        ('RUPP Campus 1 — Building B (Science & IT)'),
-        ('RUPP Campus 1 — IFL (Institute of Foreign Languages)'),
-        ('RUPP Campus 1 — Central Library (បណ្ណាល័យ)'),
-        ('RUPP Campus 1 — Sports Field & Canteen'),
-        ('RUPP Campus 2 — Faculty of Engineering (FE)'),
-        ('RUPP Campus 2 — Main Classroom Block')
+        ('Central Library - 2nd Floor'),
+        ('Student Union Cafeteria'),
+        ('Engineering Block B (Room 304)'),
+        ('Science Complex Quad'),
+        ('Campus Sports Center & Gym'),
+        ('Main Gate Bus Terminal')
     `);
 
     // Admin User
