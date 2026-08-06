@@ -10,7 +10,7 @@ export const translations = {
     foundItems: "Found Items",
     all: "All",
     statusLost: "Lost",
-    statusFound: "Available",
+    statusFound: "Found",
     statusClaimed: "Claimed",
     claimItem: "Claim Item",
     iFoundThis: "I Found This",
