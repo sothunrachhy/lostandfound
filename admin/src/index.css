@@ -2,8 +2,9 @@
 
 @layer base {
   :root {
-    --font-heading: 'Outfit', sans-serif;
-    --font-body: 'Plus Jakarta Sans', sans-serif;
+    --font-heading: 'Outfit', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
+    --font-body: 'Plus Jakarta Sans', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
+    --font-khmer: 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
