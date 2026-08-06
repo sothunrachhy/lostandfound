@@ -234,8 +234,8 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 <div className="space-y-1 pt-2 border-t border-slate-100">
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{item.LocationName}</span></div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Calendar className="w-3 h-3 text-slate-400 shrink-0" />Lost on {item.DateLost}</div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Clock className="w-3 h-3 text-teal-600 shrink-0" />Reported at {formatReportTime(item)}</div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium"><Calendar className="w-3 h-3 text-slate-400 shrink-0" />Lost on {item.DateLost}</div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium"><Clock className="w-3 h-3 text-teal-600 shrink-0" />Time: {item.ReportTime || formatReportTime(item)}</div>
                 </div>
               </div>
 
@@ -283,8 +283,8 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 <div className="space-y-1 pt-2 border-t border-slate-100">
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{item.LocationName}</span></div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Calendar className="w-3 h-3 text-slate-400 shrink-0" />Found on {item.DateFound}</div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Clock className="w-3 h-3 text-teal-600 shrink-0" />Reported at {formatReportTime(item)}</div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium"><Calendar className="w-3 h-3 text-slate-400 shrink-0" />Found on {item.DateFound}</div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium"><Clock className="w-3 h-3 text-teal-600 shrink-0" />Time: {item.ReportTime || formatReportTime(item)}</div>
                 </div>
               </div>
 
