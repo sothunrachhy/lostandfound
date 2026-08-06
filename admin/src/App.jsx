@@ -64,6 +64,20 @@ export default function App() {
 
   const handleLogout = () => { localStorage.removeItem('lf_admin'); setCurrentAdmin(null); };
   const handleUpdateClaim = async (id, status, notes) => { await fetch(`${API}/api/claims/${id}/status`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status, adminNotes: notes }) }); fetchData(); notify('Claim Updated', `Claim #${id} status set to ${status}`, 'success'); };
+  const handleDeleteClaim = async (id) => {
+    try {
+      const res = await fetch(`${API}/api/claims/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        notify('Claim Deleted', `Claim #${id} removed from database.`, 'info');
+        fetchData();
+      } else {
+        notify('Delete Failed', data.message || 'Cannot delete claim', 'error');
+      }
+    } catch {
+      notify('Error', 'Failed to delete claim.', 'error');
+    }
+  };
   const handleDeleteReport = async (type, id) => { await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' }); fetchData(); notify('Report Deleted', 'Report removed from database', 'info'); };
   const handleAddCategory  = async (name) => { await fetch(`${API}/api/categories`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Created', `Category "${name}" added.`, 'success'); };
   const handleUpdateCategory = async (id, name) => { await fetch(`${API}/api/categories/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Updated', 'Category changes saved.', 'success'); };
@@ -134,7 +148,7 @@ export default function App() {
         {/* Page content */}
         <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
           {activePage === 'dashboard' && <Dashboard stats={stats} lostItems={lostItems} foundItems={foundItems} claims={claims} categories={categories} locations={locations} />}
-          {activePage === 'claims'    && <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} />}
+          {activePage === 'claims'    && <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} onDeleteClaim={handleDeleteClaim} />}
           {activePage === 'reports'   && <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} />}
           {activePage === 'messages'  && <MessagesPage currentAdmin={currentAdmin} users={users} API={API} onRefresh={fetchData} />}
           {activePage === 'users'     && <UsersPage users={users} />}

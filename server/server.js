@@ -417,6 +417,17 @@ app.put('/api/claims/:id/status', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+app.delete('/api/claims/:id', async (req, res) => {
+  const claimId = req.params.id;
+  try {
+    const { rows } = await q(`DELETE FROM claims WHERE claim_id=$1 RETURNING claim_id`, [claimId]);
+    if (rows.length === 0) return res.status(404).json({ success: false, message: 'Claim not found' });
+    res.json({ success: true, message: 'Claim record deleted successfully' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 app.post(['/api/claims/approve-direct', '/claims/approve-direct'], async (req, res) => {
   const { foundId, finderId, ownerId } = req.body;
   try {

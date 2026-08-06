@@ -1,8 +1,10 @@
-import React from 'react';
-import { ShieldCheck, User, Search, FileText, CheckCircle, XCircle, Package, Calendar } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, User, Search, FileText, CheckCircle, XCircle, Package, Calendar, Trash2 } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
-export default function ClaimsPage({ claims, onUpdateClaim }) {
-  const [filter, setFilter] = React.useState('');
+export default function ClaimsPage({ claims, onUpdateClaim, onDeleteClaim }) {
+  const [filter, setFilter] = useState('');
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
   const filteredClaims = (claims || []).filter(c =>
     (c.FoundItem?.ItemName || '').toLowerCase().includes(filter.toLowerCase()) ||
@@ -72,10 +74,26 @@ export default function ClaimsPage({ claims, onUpdateClaim }) {
                     </span>
                   </div>
 
-                  <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {new Date(claim.SubmittedAt || Date.now()).toLocaleString()}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(claim.SubmittedAt || Date.now()).toLocaleString()}
+                    </span>
+                    {onDeleteClaim && (
+                      <button
+                        onClick={() => setConfirmModal({
+                          isOpen: true,
+                          title: 'Delete Claim Record?',
+                          message: `Are you sure you want to delete Claim #${claim.ClaimID}? This action cannot be undone.`,
+                          onConfirm: () => onDeleteClaim(claim.ClaimID)
+                        })}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer border border-transparent hover:border-rose-200"
+                        title="Delete Claim Record"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Main 3-Column Info Cards */}
@@ -158,6 +176,14 @@ export default function ClaimsPage({ claims, onUpdateClaim }) {
           })}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(c => ({ ...c, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+      />
     </div>
   );
 }
