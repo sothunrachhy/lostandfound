@@ -54,6 +54,20 @@ export default function App() {
 
   React.useEffect(() => { fetchData(); }, [currentAdmin]);
 
+  React.useEffect(() => {
+    if (!currentAdmin) return;
+    const sendHeartbeat = () => {
+      fetch(`${API}/api/users/heartbeat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentAdmin.UserID })
+      }).catch(() => {});
+    };
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 25000);
+    return () => clearInterval(interval);
+  }, [currentAdmin]);
+
   const handleLogin = async ({ email, password }) => {
     try {
       const res = await fetch(`${API}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });

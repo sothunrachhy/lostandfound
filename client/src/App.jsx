@@ -81,6 +81,20 @@ export default function App() {
 
   useEffect(() => { fetchData(); }, [currentUser]);
 
+  useEffect(() => {
+    if (!currentUser) return;
+    const sendHeartbeat = () => {
+      fetch(`${API}/api/users/heartbeat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.UserID })
+      }).catch(() => {});
+    };
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 25000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
   const notify = (title, message, type = 'success') => {
     setSuccessModal({ isOpen: true, title, message, type });
   };

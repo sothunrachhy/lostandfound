@@ -118,12 +118,28 @@ app.put('/api/users/profile', async (req, res) => {
 });
 
 app.get('/api/users', async (_req, res) => {
-  const { rows } = await q(
-    `SELECT u.user_id, u.student_id, u.name, u.email, u.phone, u.profile_image,
-            r.role_id, r.role_name
-     FROM users u JOIN roles r USING (role_id) ORDER BY u.user_id`
-  );
-  res.json(rows.map(sanitizeUser));
+  try {
+    const { rows } = await q(
+      `SELECT u.user_id, u.student_id, u.name, u.email, u.phone, u.profile_image, u.last_active,
+              r.role_id, r.role_name,
+              (u.last_active >= NOW() - INTERVAL '2 minutes') AS is_online
+       FROM users u JOIN roles r USING (role_id) ORDER BY u.user_id`
+    );
+    res.json(rows.map(sanitizeUser));
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+app.post('/api/users/heartbeat', async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).json({ success: false });
+  try {
+    await q('UPDATE users SET last_active=NOW() WHERE user_id=$1', [userId]);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
 });
 
 app.delete('/api/users/:id', async (req, res) => {
@@ -592,13 +608,15 @@ function sanitizeUser(u) {
     Phone:        u.phone,
     RoleID:       u.role_id,
     RoleName:     u.role_name,
-    ProfileImage: u.profile_image || getDefaultAvatar(u.name)
+    ProfileImage: u.profile_image || getDefaultAvatar(u.name),
+    isOnline:     u.is_online === true || u.is_online === 't'
   };
 }
 
 module.exports = app;
 
 if (require.main === module) {
+  pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_active TIMESTAMP DEFAULT NOW()').catch(() => {});
   app.listen(PORT, () => {
     console.log(`✅ LF System API running on http://localhost:${PORT}`);
     console.log(`   Database: Neon PostgreSQL (${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0]})`);
