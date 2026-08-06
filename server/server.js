@@ -394,7 +394,7 @@ app.put('/api/claims/:id/status', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post('/api/claims/approve-direct', async (req, res) => {
+app.post(['/api/claims/approve-direct', '/claims/approve-direct'], async (req, res) => {
   const { foundId, finderId, ownerId } = req.body;
   try {
     if (foundId) {
