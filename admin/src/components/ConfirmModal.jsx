@@ -1,13 +1,14 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { X, Trash2 } from 'lucide-react';
 
 export default function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete' }) {
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-100 rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl text-center space-y-3.5 relative animate-in zoom-in-95 duration-200 my-auto max-h-[90vh]">
-        <button onClick={onClose} className="absolute top-3.5 right-3.5 p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer">
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4 relative animate-in zoom-in-95 duration-200 my-auto">
+        <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer">
           <X className="w-4 h-4" />
         </button>
 
@@ -40,6 +41,7 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { X, User, Camera } from 'lucide-react';
 
 export default function AdminProfileModal({ isOpen, onClose, currentAdmin, onSaveProfile }) {
@@ -31,7 +32,7 @@ export default function AdminProfileModal({ isOpen, onClose, currentAdmin, onSav
     onClose();
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 relative animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -103,6 +104,7 @@ export default function AdminProfileModal({ isOpen, onClose, currentAdmin, onSav
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
