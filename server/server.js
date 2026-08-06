@@ -527,15 +527,31 @@ app.post('/api/messages', async (req, res) => {
   const { SenderID, ReceiverID, ItemID, MessageText } = req.body;
   if (!SenderID || !ReceiverID || !MessageText)
     return res.status(400).json({ message: 'Sender, receiver, and message text required' });
-  const { rows } = await q(
-    `INSERT INTO messages (sender_id, receiver_id, item_id, message_text)
-     VALUES ($1,$2,$3,$4)
-     RETURNING message_id AS "MessageID", sender_id AS "SenderID",
-               receiver_id AS "ReceiverID", item_id AS "ItemID",
-               message_text AS "MessageText", created_at AS "Timestamp"`,
-    [SenderID, ReceiverID, ItemID || null, MessageText]
-  );
-  res.json({ success: true, message: rows[0] });
+
+  try {
+    const { rows } = await q(
+      `INSERT INTO messages (sender_id, receiver_id, item_id, message_text)
+       VALUES ($1,$2,$3,$4)
+       RETURNING message_id AS "MessageID", sender_id AS "SenderID",
+                 receiver_id AS "ReceiverID", item_id AS "ItemID",
+                 message_text AS "MessageText", created_at AS "Timestamp"`,
+      [SenderID, ReceiverID, ItemID || null, MessageText]
+    );
+
+    // Create instant notification for message recipient
+    const senderRes = await q('SELECT name FROM users WHERE user_id=$1', [SenderID]);
+    const senderName = senderRes.rows[0]?.name || 'Campus Member';
+    const preview = MessageText.length > 50 ? MessageText.substring(0, 50) + '...' : MessageText;
+
+    await q(
+      `INSERT INTO notifications (user_id, message, type) VALUES ($1, $2, 'Message')`,
+      [ReceiverID, `💬 New message from ${senderName}: "${preview}"`]
+    );
+
+    res.json({ success: true, message: rows[0] });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
 });
 
 // ══════════════════════════════════════════════════════════════════
