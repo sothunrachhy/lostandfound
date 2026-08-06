@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, LayoutDashboard, FileText, Users, Settings, MessageSquare, RefreshCw, LogOut, ChevronRight } from 'lucide-react';
+import { Compass, ShieldCheck, LayoutDashboard, FileText, Users, Settings, MessageSquare, RefreshCw, LogOut, ChevronRight } from 'lucide-react';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard',  icon: LayoutDashboard },
@@ -19,7 +19,7 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
         <div className="px-5 py-5 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-teal-700 flex items-center justify-center shadow-sm shrink-0">
-              <ShieldCheck className="w-5 h-5 text-white" />
+              <Compass className="w-5 h-5 text-white" />
             </div>
             <div>
               <p className="text-sm font-black text-slate-900 leading-tight">LF SYSTEM</p>
