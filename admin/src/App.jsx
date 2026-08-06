@@ -9,7 +9,11 @@ import MessagesPage from './pages/MessagesPage';
 import NotificationModal from './components/NotificationModal';
 import AdminProfileModal from './components/AdminProfileModal';
 
-const API = import.meta.env.VITE_API_BASE_URL || 'https://lostandfound-two-lovat.vercel.app';
+let rawAPI = import.meta.env.VITE_API_BASE_URL || 'https://lostandfound-two-lovat.vercel.app';
+if (rawAPI && !rawAPI.startsWith('http://') && !rawAPI.startsWith('https://')) {
+  rawAPI = `https://${rawAPI}`;
+}
+const API = rawAPI.replace(/\/$/, '');
 
 export default function App() {
   const [currentAdmin, setCurrentAdmin] = useState(() => {
