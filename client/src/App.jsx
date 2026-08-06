@@ -279,7 +279,7 @@ export default function App() {
 
       <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-center">
-          <span>© 2026 LF System — Lost & Found Platform. Campus Safety Verified.</span>
+          <span>© 2026 Royal University of Phnom Penh (RUPP) — Lost & Found Platform.</span>
         </div>
       </footer>
 
