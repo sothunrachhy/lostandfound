@@ -23,7 +23,7 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
             </div>
             <div>
               <p className="text-sm font-black text-slate-900 leading-tight">LF SYSTEM</p>
-              <p className="text-[9px] font-bold text-teal-700 uppercase tracking-wide">Admin Portal</p>
+              <p className="text-[9px] font-bold text-teal-700 uppercase tracking-wide">Admin</p>
             </div>
           </div>
         </div>
