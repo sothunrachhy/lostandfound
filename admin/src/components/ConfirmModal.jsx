@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { X, Trash2 } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export default function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete' }) {
   if (!isOpen) return null;
@@ -12,16 +12,12 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
           <X className="w-4 h-4" />
         </button>
 
-        <div className="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-inner mt-1">
-          <Trash2 className="w-7 h-7" />
-        </div>
-
-        <div className="space-y-1">
-          <h3 className="text-lg font-black text-slate-800 tracking-tight">{title || 'Are you sure?'}</h3>
+        <div className="space-y-1.5 pt-2">
+          <h3 className="text-lg font-black text-slate-900 tracking-tight">{title || 'Are you sure?'}</h3>
           <p className="text-xs font-semibold text-slate-500 leading-relaxed px-2">{message}</p>
         </div>
 
-        <div className="flex gap-2.5 pt-1">
+        <div className="flex gap-2.5 pt-2">
           <button
             type="button"
             onClick={onClose}
