@@ -170,10 +170,6 @@ function AdminLoginPage({ onLogin }) {
             Access Admin
           </button>
         </form>
-
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
-          <p className="text-[10px] text-amber-700 font-semibold">🔒 Restricted to authorized campus safety personnel only</p>
-        </div>
       </div>
     </div>
   );
