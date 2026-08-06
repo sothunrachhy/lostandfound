@@ -277,12 +277,9 @@ export default function App() {
         />
       </main>
 
-      <footer className="border-t border-white/5 bg-black/40 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center">
           <span>© 2026 LF System — Lost & Found Platform. Campus Safety Verified.</span>
-          <a href="http://localhost:3001" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
-            Admin Portal →
-          </a>
         </div>
       </footer>
 
