@@ -138,7 +138,7 @@ export default function App() {
         {/* Page content */}
         <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
           {activePage === 'dashboard' && <Dashboard stats={stats} lostItems={lostItems} foundItems={foundItems} claims={claims} categories={categories} locations={locations} />}
-          {activePage === 'claims'    && <ClaimsPage claims={claims} />}
+          {activePage === 'claims'    && <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} />}
           {activePage === 'reports'   && <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} />}
           {activePage === 'messages'  && <MessagesPage currentAdmin={currentAdmin} users={users} API={API} onRefresh={fetchData} />}
           {activePage === 'users'     && <UsersPage users={users} />}
