@@ -126,6 +126,24 @@ app.get('/api/users', async (_req, res) => {
   res.json(rows.map(sanitizeUser));
 });
 
+app.delete('/api/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  try {
+    await q('DELETE FROM notifications WHERE user_id=$1', [userId]);
+    await q('DELETE FROM messages WHERE sender_id=$1 OR receiver_id=$1', [userId]);
+    await q('DELETE FROM claims WHERE owner_id=$1', [userId]);
+    await q('DELETE FROM lost_items WHERE user_id=$1', [userId]);
+    await q('DELETE FROM found_items WHERE user_id=$1', [userId]);
+
+    const { rows } = await q('DELETE FROM users WHERE user_id=$1 RETURNING user_id, name', [userId]);
+    if (rows.length === 0) return res.status(404).json({ success: false, message: 'User account not found' });
+
+    res.json({ success: true, message: `User account deleted successfully` });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // ══════════════════════════════════════════════════════════════════
 // CATEGORIES & LOCATIONS
 // ══════════════════════════════════════════════════════════════════

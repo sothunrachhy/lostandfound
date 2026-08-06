@@ -82,6 +82,20 @@ export default function App() {
       notify('Error', 'Failed to delete claim.', 'error');
     }
   };
+  const handleDeleteUser = async (userId) => {
+    try {
+      const res = await fetch(`${API}/api/users/${userId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        notify('Account Deleted', data.message || 'User account removed from database.', 'info');
+        fetchData();
+      } else {
+        notify('Delete Failed', data.message || 'Cannot delete user account', 'error');
+      }
+    } catch {
+      notify('Error', 'Failed to delete user account.', 'error');
+    }
+  };
   const handleDeleteReport = async (type, id) => { await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' }); fetchData(); notify('Report Deleted', 'Report removed from database', 'info'); };
   const handleAddCategory  = async (name) => { await fetch(`${API}/api/categories`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Created', `Category "${name}" added.`, 'success'); };
   const handleUpdateCategory = async (id, name) => { await fetch(`${API}/api/categories/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Updated', 'Category changes saved.', 'success'); };
@@ -155,7 +169,7 @@ export default function App() {
           {activePage === 'claims'    && <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} onDeleteClaim={handleDeleteClaim} />}
           {activePage === 'reports'   && <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} />}
           {activePage === 'messages'  && <MessagesPage currentAdmin={currentAdmin} users={users} API={API} onRefresh={fetchData} />}
-          {activePage === 'users'     && <UsersPage users={users} />}
+          {activePage === 'users'     && <UsersPage users={users} onDeleteUser={handleDeleteUser} />}
           {activePage === 'settings'  && (
             <SettingsPage
               categories={categories}

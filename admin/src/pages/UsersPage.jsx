@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Mail, Phone, CreditCard, X, User, Search } from 'lucide-react';
+import { Mail, Phone, CreditCard, X, User, Search, Trash2 } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
-export default function UsersPage({ users }) {
+export default function UsersPage({ users, onDeleteUser }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState('');
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
   const filteredUsers = (users || []).filter(u =>
     (u.Name || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -41,7 +43,7 @@ export default function UsersPage({ users }) {
               <th className="text-left py-3.5 px-6 font-bold hidden md:table-cell">Student ID</th>
               <th className="text-left py-3.5 px-6 font-bold hidden sm:table-cell">Email Address</th>
               <th className="text-left py-3.5 px-6 font-bold">Role</th>
-              <th className="text-right py-3.5 px-6 font-bold">Details</th>
+              <th className="text-right py-3.5 px-6 font-bold">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -82,9 +84,28 @@ export default function UsersPage({ users }) {
                     </span>
                   </td>
                   <td className="py-3.5 px-6 text-right">
-                    <span className="text-xs text-teal-700 font-bold group-hover:translate-x-0.5 transition-transform inline-block">
-                      View Profile →
-                    </span>
+                    <div className="flex items-center justify-end gap-2">
+                      <span className="text-xs text-teal-700 font-bold group-hover:translate-x-0.5 transition-transform inline-block">
+                        View Profile →
+                      </span>
+                      {onDeleteUser && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmModal({
+                              isOpen: true,
+                              title: 'Delete User Account?',
+                              message: `Permanently delete user account "${u.Name}" (${u.Email}) from database?`,
+                              onConfirm: () => onDeleteUser(u.UserID)
+                            });
+                          }}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer border border-transparent hover:border-rose-200 ml-1"
+                          title="Delete User Account"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -148,16 +169,43 @@ export default function UsersPage({ users }) {
               </div>
             </div>
 
-            <button
-              onClick={() => setSelectedUser(null)}
-              className="w-full btn-admin text-xs py-2.5 rounded-xl justify-center cursor-pointer font-bold"
-            >
-              Close Profile
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-colors"
+              >
+                Close
+              </button>
+              {onDeleteUser && (
+                <button
+                  onClick={() => {
+                    const u = selectedUser;
+                    setSelectedUser(null);
+                    setConfirmModal({
+                      isOpen: true,
+                      title: 'Delete User Account?',
+                      message: `Permanently delete user account "${u.Name}" (${u.Email}) from database?`,
+                      onConfirm: () => onDeleteUser(u.UserID)
+                    });
+                  }}
+                  className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all shadow-md shadow-rose-600/20 active:scale-95 flex items-center justify-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete User
+                </button>
+              )}
+            </div>
           </div>
         </div>,
         document.body
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(c => ({ ...c, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+      />
     </div>
   );
 }
