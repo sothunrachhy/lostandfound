@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search } from 'lucide-react';
+import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search, MapPin, Calendar, Tag, MessageCircle } from 'lucide-react';
 
 const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
   const reader = new FileReader();
@@ -654,3 +654,136 @@ export function NotificationModal({ isOpen, onClose, title, message, type = 'suc
 }
 
 export const SuccessModal = NotificationModal;
+
+export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat, onOpenClaim, onApproveDirect, onDeleteReport }) {
+  if (!isOpen || !item) return null;
+
+  const isFound = 'FoundID' in item;
+  const isOwnerOrFinder = currentUser && currentUser.UserID === item.UserID;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white border border-slate-100 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200 my-8">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm cursor-pointer transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Full Image Lightbox Header */}
+        <div className="relative bg-slate-900 flex items-center justify-center max-h-[420px] overflow-hidden group">
+          {item.Image ? (
+            <img
+              src={item.Image}
+              alt={item.ItemName}
+              className="w-full h-full object-contain max-h-[420px] transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="h-64 flex flex-col items-center justify-center text-slate-500 gap-2">
+              <Upload className="w-12 h-12 opacity-40" />
+              <p className="text-xs font-semibold">No Image Provided</p>
+            </div>
+          )}
+
+          {/* Badges */}
+          <div className="absolute top-4 left-4 flex gap-2">
+            <span className={`text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md ${
+              isFound ? 'bg-teal-600 text-white' : 'bg-rose-600 text-white'
+            }`}>
+              {isFound ? '✓ Found Item' : '🔍 Lost Item'}
+            </span>
+            <span className={`text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md ${
+              item.Status === 'Claimed' ? 'bg-amber-600 text-white' : 'bg-emerald-600 text-white'
+            }`}>
+              {item.Status || 'Available'}
+            </span>
+          </div>
+        </div>
+
+        {/* Content Details */}
+        <div className="p-6 space-y-5">
+          <div className="space-y-1.5">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{item.ItemName}</h2>
+            <p className="text-sm text-slate-600 leading-relaxed">{item.Description || 'No additional details provided.'}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-100 text-xs">
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Campus Location</span>
+              <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-teal-600 shrink-0" />
+                {item.LocationName || 'Campus Building'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date {isFound ? 'Found' : 'Lost'}</span>
+              <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-teal-600 shrink-0" />
+                {isFound ? item.DateFound : item.DateLost}
+              </p>
+            </div>
+
+            {item.Brand && (
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Brand / Make</span>
+                <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <Tag className="w-4 h-4 text-teal-600 shrink-0" />
+                  {item.Brand}
+                </p>
+              </div>
+            )}
+
+            {item.Color && (
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color</span>
+                <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <Tag className="w-4 h-4 text-teal-600 shrink-0" />
+                  {item.Color}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs">
+            <span className="text-slate-400 font-medium">
+              Reported by <strong className="text-slate-700 font-bold">{item.FinderName || item.OwnerName || 'Campus Member'}</strong>
+            </span>
+          </div>
+
+          {/* Action Footer */}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              onClick={() => { onClose(); onOpenChat(item.UserID); }}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-3 rounded-2xl cursor-pointer flex items-center gap-1.5 transition-colors"
+            >
+              <MessageCircle className="w-4 h-4 text-teal-600" />
+              Chat with Reporter
+            </button>
+
+            {isFound && item.Status !== 'Claimed' && (
+              isOwnerOrFinder ? (
+                <button
+                  onClick={() => { onClose(); onApproveDirect && onApproveDirect(item.FoundID, null); }}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-2xl cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all active:scale-95"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Mark Returned
+                </button>
+              ) : (
+                <button
+                  onClick={() => { onClose(); onOpenClaim(item); }}
+                  className="btn-primary text-xs px-5 py-3 rounded-2xl cursor-pointer font-bold shadow-md active:scale-95"
+                >
+                  Claim This Item
+                </button>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

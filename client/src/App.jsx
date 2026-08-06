@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
-import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal } from './components/Modals';
+import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal, ItemDetailModal } from './components/Modals';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export default function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('lf_lang') || 'en');
   const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
+  const [selectedDetailItem, setSelectedDetailItem] = useState(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('lang', lang);
@@ -319,6 +320,7 @@ export default function App() {
           onOpenChat={handleOpenChat}
           onDeleteReport={handleDeleteReport}
           onApproveDirect={handleApproveDirect}
+          onSelectItem={(item) => setSelectedDetailItem(item)}
         />
       </main>
 
@@ -348,6 +350,10 @@ export default function App() {
 
       <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
         currentUser={currentUser} onSaveProfile={handleSaveProfile} />
+
+      <ItemDetailModal isOpen={!!selectedDetailItem} onClose={() => setSelectedDetailItem(null)}
+        item={selectedDetailItem} currentUser={currentUser} onOpenChat={handleOpenChat}
+        onOpenClaim={handleOpenClaim} onApproveDirect={handleApproveDirect} onDeleteReport={handleDeleteReport} />
 
       <NotificationModal isOpen={successModal.isOpen} onClose={() => setSuccessModal(s => ({ ...s, isOpen: false }))}
         title={successModal.title} message={successModal.message} type={successModal.type} />

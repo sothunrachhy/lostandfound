@@ -99,7 +99,7 @@ function CustomSelect({ value, options, placeholder, onChange, icon: Icon, class
   );
 }
 
-export default function HomePage({ lostItems, foundItems, matches, categories, locations, currentUser, lang = 'en', onOpenReport, onOpenClaim, onOpenChat, onDeleteReport, onApproveDirect }) {
+export default function HomePage({ lostItems, foundItems, matches, categories, locations, currentUser, lang = 'en', onOpenReport, onOpenClaim, onOpenChat, onDeleteReport, onApproveDirect, onSelectItem }) {
   const t = translations[lang] || translations.en;
   const [search, setSearch]     = useState('');
   const [catFilter, setCatFilter] = useState('');
@@ -198,8 +198,11 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
         /* ── Grid ──────────────────────────────────────── */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {(tab === 'all' || tab === 'lost') && lost.map(item => (
-            <div key={`l-${item.LostID}`} className="item-card item-card-lost">
-              <div className="relative h-52 overflow-hidden bg-slate-100 shrink-0">
+            <div key={`l-${item.LostID}`} className="item-card item-card-lost group">
+              <div
+                onClick={() => onSelectItem && onSelectItem(item)}
+                className="relative h-52 overflow-hidden bg-slate-100 shrink-0 cursor-pointer"
+              >
                 <ItemImage src={item.Image} alt={item.ItemName} type="lost" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                 <span className="badge-lost absolute top-3 left-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">
@@ -210,8 +213,11 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 )}
               </div>
 
-              <div className="p-4 flex-1 space-y-2">
-                <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{item.ItemName}</h3>
+              <div
+                onClick={() => onSelectItem && onSelectItem(item)}
+                className="p-4 flex-1 space-y-2 cursor-pointer"
+              >
+                <h3 className="text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-teal-700 transition-colors">{item.ItemName}</h3>
                 <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{item.Description || 'No description provided.'}</p>
                 <div className="space-y-1 pt-2 border-t border-slate-100">
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
@@ -239,8 +245,11 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
           ))}
 
           {(tab === 'all' || tab === 'found') && found.map(item => (
-            <div key={`f-${item.FoundID}`} className="item-card item-card-found">
-              <div className="relative h-52 overflow-hidden bg-slate-100 shrink-0">
+            <div key={`f-${item.FoundID}`} className="item-card item-card-found group">
+              <div
+                onClick={() => onSelectItem && onSelectItem(item)}
+                className="relative h-52 overflow-hidden bg-slate-100 shrink-0 cursor-pointer"
+              >
                 <ItemImage src={item.Image} alt={item.ItemName} type="found" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                 <span className="badge-found absolute top-3 left-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">
@@ -252,8 +261,11 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 }
               </div>
 
-              <div className="p-4 flex-1 space-y-2">
-                <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{item.ItemName}</h3>
+              <div
+                onClick={() => onSelectItem && onSelectItem(item)}
+                className="p-4 flex-1 space-y-2 cursor-pointer"
+              >
+                <h3 className="text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-teal-700 transition-colors">{item.ItemName}</h3>
                 <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{item.Description || 'No description provided.'}</p>
                 <div className="space-y-1 pt-2 border-t border-slate-100">
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
