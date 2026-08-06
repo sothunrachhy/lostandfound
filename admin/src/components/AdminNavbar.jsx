@@ -10,7 +10,7 @@ const navItems = [
   { id: 'settings',  label: 'Settings',   icon: Settings },
 ];
 
-export default function AdminNavbar({ currentAdmin, activePage, setActivePage, pendingClaims, onLogout, onRefresh }) {
+export default function AdminNavbar({ currentAdmin, activePage, setActivePage, pendingClaims, onLogout, onRefresh, onOpenProfile }) {
   return (
     <>
       {/* ── Sidebar (desktop) ──────────────────────── */}
@@ -53,13 +53,23 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
           <button onClick={onLogout} className="nav-item w-full text-left text-rose-500 hover:bg-rose-50 hover:text-rose-600">
             <LogOut className="w-4 h-4 shrink-0" /> Sign Out
           </button>
-          <div className="flex items-center gap-2.5 px-3 py-2 mt-1 bg-slate-50 rounded-xl border border-slate-100">
-            <img src={currentAdmin.ProfileImage} alt="" className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0" />
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-700 truncate">{currentAdmin.Name.split(' ')[0]}</p>
-              <p className="text-[10px] text-slate-400 truncate">{currentAdmin.Email}</p>
+
+          <button
+            onClick={onOpenProfile}
+            className="w-full flex items-center gap-2.5 px-3 py-2 mt-1 bg-slate-50 hover:bg-teal-50 border border-slate-100 hover:border-teal-200 rounded-xl transition-all cursor-pointer text-left group"
+          >
+            <div className="w-7 h-7 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+              {currentAdmin.ProfileImage ? (
+                <img src={currentAdmin.ProfileImage} alt="" className="w-full h-full object-cover" />
+              ) : (
+                currentAdmin.Name?.charAt(0).toUpperCase() || 'A'
+              )}
             </div>
-          </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-slate-700 group-hover:text-teal-800 truncate">{currentAdmin.Name}</p>
+              <p className="text-[10px] text-teal-600 font-semibold truncate">Edit Admin Profile ⚙️</p>
+            </div>
+          </button>
         </div>
       </aside>
 

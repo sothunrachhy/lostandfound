@@ -7,6 +7,7 @@ import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
 import MessagesPage from './pages/MessagesPage';
 import NotificationModal from './components/NotificationModal';
+import AdminProfileModal from './components/AdminProfileModal';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -16,6 +17,7 @@ export default function App() {
     return s ? JSON.parse(s) : null;
   });
   const [activePage,  setActivePage]  = useState('dashboard');
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [modalNotify, setModalNotify] = useState({ isOpen: false, title: '', message: '', type: 'success' });
   const [stats,       setStats]       = useState({});
   const [claims,      setClaims]      = useState([]);
@@ -83,6 +85,26 @@ export default function App() {
     fetchData();
   };
 
+  const handleSaveProfile = async (profileData) => {
+    try {
+      const res = await fetch(`${API}/api/users/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData)
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('lf_admin', JSON.stringify(data.user));
+        setCurrentAdmin(data.user);
+        notify('Profile Saved!', 'Admin profile updated successfully.', 'success');
+      } else {
+        notify('Update Failed', data.message, 'error');
+      }
+    } catch (e) {
+      notify('Error', 'Failed to update admin profile.', 'error');
+    }
+  };
+
   if (!currentAdmin) return <AdminLoginPage onLogin={handleLogin} />;
 
   const pendingClaims = claims.filter(c => c.Status === 'Pending').length;
@@ -90,7 +112,8 @@ export default function App() {
   return (
     <div className="admin-shell">
       <AdminNavbar currentAdmin={currentAdmin} activePage={activePage} setActivePage={setActivePage}
-        pendingClaims={pendingClaims} onLogout={handleLogout} onRefresh={fetchData} />
+        pendingClaims={pendingClaims} onLogout={handleLogout} onRefresh={fetchData}
+        onOpenProfile={() => setIsProfileOpen(true)} />
 
       <div className="admin-main">
         {/* Page title bar */}
@@ -133,6 +156,9 @@ export default function App() {
           )}
         </main>
       </div>
+
+      <AdminProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
+        currentAdmin={currentAdmin} onSaveProfile={handleSaveProfile} />
 
       <NotificationModal isOpen={modalNotify.isOpen} onClose={() => setModalNotify(m => ({ ...m, isOpen: false }))}
         title={modalNotify.title} message={modalNotify.message} type={modalNotify.type} />
