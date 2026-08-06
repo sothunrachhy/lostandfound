@@ -9,7 +9,7 @@ import MessagesPage from './pages/MessagesPage';
 import NotificationModal from './components/NotificationModal';
 import AdminProfileModal from './components/AdminProfileModal';
 
-const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API = import.meta.env.VITE_API_BASE_URL || 'https://lostfound.wtf';
 
 export default function App() {
   const [currentAdmin, setCurrentAdmin] = useState(() => {
