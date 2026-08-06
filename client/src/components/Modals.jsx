@@ -689,11 +689,11 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
             }`}>
               {isFound ? 'Found Item' : 'Lost Item'}
             </span>
-            <span className={`text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md ${
-              item.Status === 'Claimed' ? 'bg-amber-600 text-white' : 'bg-emerald-600 text-white'
-            }`}>
-              {item.Status || 'Available'}
-            </span>
+            {item.Status === 'Claimed' && (
+              <span className="text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md bg-amber-600 text-white">
+                Claimed
+              </span>
+            )}
           </div>
         </div>
 
