@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Tag, MapPin, Plus, Edit2, Trash2, Check, X } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function SettingsPage({
   categories, locations,
@@ -8,6 +9,7 @@ export default function SettingsPage({
 }) {
   const [newCat, setNewCat] = useState('');
   const [newLoc, setNewLoc] = useState('');
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
   const [editingCatId, setEditingCatId] = useState(null);
   const [editCatText, setEditCatText] = useState('');
@@ -88,7 +90,12 @@ export default function SettingsPage({
                           className="p-1.5 rounded-lg text-slate-400 hover:text-teal-700 hover:bg-teal-50 transition-colors cursor-pointer">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button type="button" onClick={() => { if (confirm(`Delete category "${c.CategoryName}"?`)) onDeleteCategory(c.CategoryID); }} title="Delete Category"
+                        <button type="button" onClick={() => setConfirmModal({
+                          isOpen: true,
+                          title: 'Delete Category?',
+                          message: `Are you sure you want to delete category "${c.CategoryName}"?`,
+                          onConfirm: () => onDeleteCategory(c.CategoryID)
+                        })} title="Delete Category"
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -142,7 +149,12 @@ export default function SettingsPage({
                           className="p-1.5 rounded-lg text-slate-400 hover:text-teal-700 hover:bg-teal-50 transition-colors cursor-pointer">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button type="button" onClick={() => { if (confirm(`Delete location "${l.LocationName}"?`)) onDeleteLocation(l.LocationID); }} title="Delete Location"
+                        <button type="button" onClick={() => setConfirmModal({
+                          isOpen: true,
+                          title: 'Delete Location?',
+                          message: `Are you sure you want to delete location "${l.LocationName}"?`,
+                          onConfirm: () => onDeleteLocation(l.LocationID)
+                        })} title="Delete Location"
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -156,6 +168,15 @@ export default function SettingsPage({
         </div>
 
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(c => ({ ...c, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+      />
+    </div>
     </div>
   );
 }
