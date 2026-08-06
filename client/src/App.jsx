@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
-import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal } from './components/Modals';
+import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal } from './components/Modals';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
