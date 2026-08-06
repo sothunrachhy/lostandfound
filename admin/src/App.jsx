@@ -8,6 +8,7 @@ import SettingsPage from './pages/SettingsPage';
 import MessagesPage from './pages/MessagesPage';
 import NotificationModal from './components/NotificationModal';
 import AdminProfileModal from './components/AdminProfileModal';
+import ConfirmModal from './components/ConfirmModal';
 
 let rawAPI = import.meta.env.VITE_API_BASE_URL || 'https://lostandfound-two-lovat.vercel.app';
 if (rawAPI && !rawAPI.startsWith('http://') && !rawAPI.startsWith('https://')) {
@@ -22,6 +23,7 @@ export default function App() {
   });
   const [activePage,  setActivePage]  = useState('dashboard');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [logoutConfirmModal, setLogoutConfirmModal] = useState({ isOpen: false, title: '', message: '', confirmText: 'Sign Out', onConfirm: () => {} });
   const [modalNotify, setModalNotify] = useState({ isOpen: false, title: '', message: '', type: 'success' });
   const [stats,       setStats]       = useState({});
   const [claims,      setClaims]      = useState([]);
@@ -84,7 +86,21 @@ export default function App() {
     } catch { notify('Connection Error', 'Cannot connect to API server.', 'error'); }
   };
 
-  const handleLogout = () => { localStorage.removeItem('lf_admin'); setCurrentAdmin(null); };
+  const handleLogout = () => {
+    localStorage.removeItem('lf_admin');
+    setCurrentAdmin(null);
+    notify('Signed Out', 'You have been signed out of Admin Control Center.', 'info');
+  };
+
+  const promptLogout = () => {
+    setLogoutConfirmModal({
+      isOpen: true,
+      title: 'Sign Out Admin?',
+      message: 'Are you sure you want to sign out of the Admin Control Center?',
+      confirmText: 'Sign Out',
+      onConfirm: handleLogout
+    });
+  };
   const handleUpdateClaim = async (id, status, notes) => { await fetch(`${API}/api/claims/${id}/status`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status, adminNotes: notes }) }); fetchData(); notify('Claim Updated', `Claim #${id} status set to ${status}`, 'success'); };
   const handleDeleteClaim = async (id) => {
     try {
@@ -162,7 +178,7 @@ export default function App() {
   return (
     <div className="admin-shell">
       <AdminNavbar currentAdmin={currentAdmin} activePage={activePage} setActivePage={setActivePage}
-        pendingClaims={pendingClaims} onLogout={handleLogout} onRefresh={fetchData}
+        pendingClaims={pendingClaims} onLogout={promptLogout} onRefresh={fetchData}
         onOpenProfile={() => setIsProfileOpen(true)} />
 
       <div className="admin-main">
@@ -208,6 +224,9 @@ export default function App() {
 
       <NotificationModal isOpen={modalNotify.isOpen} onClose={() => setModalNotify(m => ({ ...m, isOpen: false }))}
         title={modalNotify.title} message={modalNotify.message} type={modalNotify.type} />
+
+      <ConfirmModal isOpen={logoutConfirmModal.isOpen} onClose={() => setLogoutConfirmModal(s => ({ ...s, isOpen: false }))}
+        title={logoutConfirmModal.title} message={logoutConfirmModal.message} confirmText={logoutConfirmModal.confirmText} onConfirm={logoutConfirmModal.onConfirm} />
     </div>
   );
 }

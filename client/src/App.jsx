@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
-import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal, ItemDetailModal } from './components/Modals';
+import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal, ItemDetailModal, ConfirmModal } from './components/Modals';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export default function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('lf_lang') || 'en');
   const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
+  const [logoutConfirmModal, setLogoutConfirmModal] = useState({ isOpen: false, title: '', message: '', confirmText: 'Sign Out', onConfirm: () => {} });
   const [selectedDetailItem, setSelectedDetailItem] = useState(null);
 
   useEffect(() => {
@@ -152,6 +153,17 @@ export default function App() {
     localStorage.removeItem('lf_user');
     setCurrentUser(null);
     setShowLogin(true);
+    notify('Signed Out', 'You have been signed out successfully.', 'info');
+  };
+
+  const promptLogout = () => {
+    setLogoutConfirmModal({
+      isOpen: true,
+      title: 'Sign Out?',
+      message: 'Are you sure you want to sign out of your account?',
+      confirmText: 'Sign Out',
+      onConfirm: handleLogout
+    });
   };
 
   const handleSaveProfile = async (profileData) => {
@@ -321,7 +333,7 @@ export default function App() {
         onOpenChat={() => handleOpenChat()}
         onOpenReport={(mode) => { setReportMode(mode); setIsReportOpen(true); }}
         onOpenProfile={() => setIsProfileOpen(true)}
-        onLogout={handleLogout}
+        onLogout={promptLogout}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8">
@@ -375,6 +387,9 @@ export default function App() {
 
       <NotificationModal isOpen={successModal.isOpen} onClose={() => setSuccessModal(s => ({ ...s, isOpen: false }))}
         title={successModal.title} message={successModal.message} type={successModal.type} />
+
+      <ConfirmModal isOpen={logoutConfirmModal.isOpen} onClose={() => setLogoutConfirmModal(s => ({ ...s, isOpen: false }))}
+        title={logoutConfirmModal.title} message={logoutConfirmModal.message} confirmText={logoutConfirmModal.confirmText} onConfirm={logoutConfirmModal.onConfirm} />
     </div>
   );
 }
