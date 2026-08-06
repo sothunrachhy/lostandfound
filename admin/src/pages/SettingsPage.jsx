@@ -177,6 +177,5 @@ export default function SettingsPage({
         message={confirmModal.message}
       />
     </div>
-    </div>
   );
 }
