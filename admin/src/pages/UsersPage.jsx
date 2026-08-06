@@ -1,65 +1,102 @@
 import React, { useState } from 'react';
-import { Mail, Phone, CreditCard, X, User } from 'lucide-react';
+import ReactDOM from 'react-dom';
+import { Mail, Phone, CreditCard, X, User, Search } from 'lucide-react';
 
 export default function UsersPage({ users }) {
   const [selectedUser, setSelectedUser] = useState(null);
+  const [search, setSearch] = useState('');
+
+  const filteredUsers = (users || []).filter(u =>
+    (u.Name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (u.Email || '').toLowerCase().includes(search.toLowerCase()) ||
+    (u.StudentID || '').toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6 pb-16">
-      <div>
-        <h2 className="text-2xl font-black text-slate-800">User Management</h2>
+    <div className="space-y-6 pb-16 fade-up">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">User Directory</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Manage registered RUPP students and campus administrator accounts.</p>
+        </div>
+        <div className="relative w-full sm:w-72">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by name, student ID, email..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="admin-input admin-input-search text-xs py-2.5 w-full bg-white border-slate-200"
+          />
+        </div>
       </div>
 
-      <div className="admin-card overflow-hidden">
-        <table className="w-full text-sm">
+      {/* Directory Table Card */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wider">
-              <th className="text-left py-3.5 px-5 font-bold">User</th>
-              <th className="text-left py-3.5 px-5 font-bold hidden md:table-cell">Student ID</th>
-              <th className="text-left py-3.5 px-5 font-bold hidden sm:table-cell">Email</th>
-              <th className="text-left py-3.5 px-5 font-bold">Role</th>
-              <th className="text-right py-3.5 px-5 font-bold">Action</th>
+            <tr className="border-b border-slate-200 bg-slate-50/70 text-[11px] text-slate-400 uppercase tracking-wider font-bold">
+              <th className="text-left py-3.5 px-6 font-bold">User Name</th>
+              <th className="text-left py-3.5 px-6 font-bold hidden md:table-cell">Student ID</th>
+              <th className="text-left py-3.5 px-6 font-bold hidden sm:table-cell">Email Address</th>
+              <th className="text-left py-3.5 px-6 font-bold">Role</th>
+              <th className="text-right py-3.5 px-6 font-bold">Details</th>
             </tr>
           </thead>
-          <tbody>
-            {users.map(u => (
-              <tr
-                key={u.UserID}
-                onClick={() => setSelectedUser(u)}
-                className="border-b border-slate-100 last:border-0 hover:bg-teal-50/60 cursor-pointer transition-colors"
-              >
-                <td className="py-3.5 px-5">
-                  <div className="flex items-center gap-3">
-                    <img src={u.ProfileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.Name)}`} alt="" className="w-8 h-8 rounded-full object-cover border border-slate-200" />
-                    <span className="font-semibold text-slate-800">{u.Name}</span>
-                  </div>
-                </td>
-                <td className="py-3.5 px-5 font-mono text-slate-400 text-xs hidden md:table-cell">{u.StudentID || 'N/A'}</td>
-                <td className="py-3.5 px-5 text-slate-500 hidden sm:table-cell">{u.Email}</td>
-                <td className="py-3.5 px-5">
-                  <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
-                    u.RoleID === 2
-                      ? 'bg-teal-50 text-teal-700 border border-teal-200'
-                      : 'bg-slate-100 text-slate-500 border border-slate-200'
-                  }`}>
-                    {u.RoleName}
-                  </span>
-                </td>
-                <td className="py-3.5 px-5 text-right">
-                  <span className="text-xs text-teal-700 font-bold hover:underline">
-                    View Profile →
-                  </span>
+          <tbody className="divide-y divide-slate-100">
+            {filteredUsers.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="py-12 text-center text-slate-400 font-medium">
+                  No users matching "{search}"
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredUsers.map(u => (
+                <tr
+                  key={u.UserID}
+                  onClick={() => setSelectedUser(u)}
+                  className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
+                >
+                  <td className="py-3.5 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-2xs border border-teal-600">
+                        {u.ProfileImage || u.profile_image ? (
+                          <img src={u.ProfileImage || u.profile_image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          u.Name?.charAt(0).toUpperCase() || 'U'
+                        )}
+                      </div>
+                      <span className="font-bold text-slate-900 group-hover:text-teal-700 transition-colors">{u.Name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-6 font-mono text-slate-500 font-semibold hidden md:table-cell">{u.StudentID || 'N/A'}</td>
+                  <td className="py-3.5 px-6 text-slate-600 font-medium hidden sm:table-cell">{u.Email}</td>
+                  <td className="py-3.5 px-6">
+                    <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
+                      u.RoleID === 2 || u.RoleName === 'Admin'
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                        : 'bg-teal-50 text-teal-700 border border-teal-200'
+                    }`}>
+                      {u.RoleName || (u.RoleID === 2 ? 'Admin' : 'Student')}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-6 text-right">
+                    <span className="text-xs text-teal-700 font-bold group-hover:translate-x-0.5 transition-transform inline-block">
+                      View Profile →
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* ── User Profile Details Modal ─────────── */}
-      {selectedUser && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-sm p-6 relative fade-up space-y-5">
+      {/* ── User Profile Details Modal (React Portal) ─────────── */}
+      {selectedUser && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl shadow-2xl w-full max-w-sm p-6 relative animate-in zoom-in-95 duration-200 space-y-5">
             <button
               onClick={() => setSelectedUser(null)}
               className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer"
@@ -68,15 +105,19 @@ export default function UsersPage({ users }) {
             </button>
 
             <div className="flex flex-col items-center text-center space-y-3 pt-2">
-              <img
-                src={selectedUser.ProfileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.Name)}`}
-                alt=""
-                className="w-20 h-20 rounded-full object-cover border-4 border-teal-600 shadow-md"
-              />
+              <div className="w-20 h-20 rounded-full bg-teal-700 text-white font-bold text-2xl flex items-center justify-center overflow-hidden shadow-md border-2 border-teal-600">
+                {selectedUser.ProfileImage || selectedUser.profile_image ? (
+                  <img src={selectedUser.ProfileImage || selectedUser.profile_image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{selectedUser.Name?.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
               <div>
-                <h3 className="text-lg font-black text-slate-800">{selectedUser.Name}</h3>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-800 inline-block mt-1">
-                  {selectedUser.RoleName || 'Student User'}
+                <h3 className="text-lg font-black text-slate-900">{selectedUser.Name}</h3>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block mt-1 ${
+                  selectedUser.RoleID === 2 ? 'bg-amber-100 text-amber-800' : 'bg-teal-100 text-teal-800'
+                }`}>
+                  {selectedUser.RoleName || (selectedUser.RoleID === 2 ? 'Administrator' : 'Student User')}
                 </span>
               </div>
             </div>
@@ -109,12 +150,13 @@ export default function UsersPage({ users }) {
 
             <button
               onClick={() => setSelectedUser(null)}
-              className="w-full btn-admin text-xs py-2.5 rounded-xl justify-center cursor-pointer"
+              className="w-full btn-admin text-xs py-2.5 rounded-xl justify-center cursor-pointer font-bold"
             >
               Close Profile
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

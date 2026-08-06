@@ -2,8 +2,8 @@
 
 @layer base {
   :root {
-    --font-heading: 'Outfit', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
-    --font-body: 'Plus Jakarta Sans', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
+    --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
     --font-khmer: 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
   }
 
@@ -15,32 +15,38 @@
     color: #0f172a;
     min-height: 100vh;
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
 
-  h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); line-height: 1.2; }
+  h1,h2,h3,h4,h5,h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
 }
 
 /* ── Sidebar layout ──────────────────────────── */
-.admin-shell { display: flex; min-height: 100vh; }
+.admin-shell { display: flex; min-height: 100vh; background: #f8fafc; }
 
 .admin-sidebar {
-  width: 220px;
+  width: 240px;
   min-height: 100vh;
-  background: #fff;
+  background: #ffffff;
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 30;
-  box-shadow: 2px 0 8px rgba(0,0,0,.04);
+  box-shadow: 1px 0 3px rgba(0,0,0,.03);
 }
 
 .admin-main {
-  margin-left: 220px;
+  margin-left: 240px;
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
@@ -49,14 +55,14 @@
 }
 
 .admin-topbar {
-  background: #fff;
+  background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  padding: .875rem 1.5rem;
+  padding: 1rem 1.75rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -64,63 +70,65 @@
 
 /* ── Cards ───────────────────────────────────── */
 .admin-card {
-  background: #fff;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 
 .metric-card {
-  background: #fff;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 1.25rem;
-  padding: 1.5rem 1.25rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,.05);
-  transition: box-shadow .2s ease, transform .2s ease;
+  padding: 1.35rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .metric-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,.09);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,.08);
   transform: translateY(-2px);
+  border-color: #cbd5e1;
 }
 
 /* ── Buttons ─────────────────────────────────── */
 .btn-admin {
   display: inline-flex; align-items: center; gap: .4rem;
-  background: #0f766e; color: #fff; font-weight: 700;
-  cursor: pointer; transition: background .18s ease, transform .15s ease;
+  background: #0f766e; color: #fff; font-weight: 600;
+  cursor: pointer; transition: all .18s ease;
+  box-shadow: 0 1px 2px rgba(15,118,110,.2);
 }
 .btn-admin:hover { background: #0d6b64; transform: translateY(-1px); }
 
 .btn-approve {
   display: inline-flex; align-items: center; gap: .4rem;
-  background: #15803d; color: #fff; font-weight: 700;
+  background: #16a34a; color: #fff; font-weight: 600;
   cursor: pointer; transition: background .18s ease;
 }
-.btn-approve:hover { background: #166534; }
+.btn-approve:hover { background: #15803d; }
 
 .btn-reject {
   display: inline-flex; align-items: center; gap: .4rem;
-  background: #fff1f2; color: #be123c; font-weight: 700;
-  border: 1px solid #fda4af;
+  background: #fff1f2; color: #e11d48; font-weight: 600;
+  border: 1px solid #fecdd3;
   cursor: pointer; transition: all .18s ease;
 }
 .btn-reject:hover { background: #ffe4e6; }
 
 .btn-ghost {
   display: inline-flex; align-items: center; gap: .4rem;
-  background: #f1f5f9; color: #475569;
+  background: #f8fafc; color: #475569;
   border: 1px solid #e2e8f0; font-weight: 600;
   cursor: pointer; transition: all .18s ease;
 }
-.btn-ghost:hover { background: #e2e8f0; color: #0f172a; }
+.btn-ghost:hover { background: #f1f5f9; color: #0f172a; }
 
 /* ── Inputs ──────────────────────────────────── */
 .admin-input {
   width: 100%;
-  background: #fff;
-  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: .75rem;
-  padding: .6rem .9rem;
+  padding: .55rem .85rem;
   color: #0f172a;
   font-size: .8125rem;
   outline: none;
@@ -134,31 +142,31 @@
 /* ── Nav item ─────────────────────────────────── */
 .nav-item {
   display: flex; align-items: center; gap: .75rem;
-  padding: .625rem 1rem; border-radius: .875rem;
-  font-size: .8rem; font-weight: 600; cursor: pointer;
+  padding: .6rem .85rem; border-radius: .75rem;
+  font-size: .8125rem; font-weight: 600; cursor: pointer;
   transition: all .18s ease; color: #64748b;
   text-decoration: none;
 }
-.nav-item:hover  { background: #f1f5f9; color: #0f172a; }
-.nav-item-active { background: #f0fdfa; color: #0f766e; font-weight: 700; }
+.nav-item:hover  { background: #f8fafc; color: #0f172a; }
+.nav-item-active { background: #f0fdfa; color: #0f766e; font-weight: 700; border-left: 3px solid #0f766e; }
 
 /* ── Section label ───────────────────────────── */
 .section-label {
   font-size: .6875rem;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .07em;
+  letter-spacing: .06em;
 }
 
 /* ── Scrollbar ───────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f8fafc; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ── Animations ──────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.fade-up { animation: fadeUp .35s ease both; }
+.fade-up { animation: fadeUp .25s ease-out both; }
