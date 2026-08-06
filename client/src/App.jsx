@@ -79,7 +79,11 @@ export default function App() {
     }
   };
 
-  useEffect(() => { fetchData(); }, [currentUser]);
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser) return;

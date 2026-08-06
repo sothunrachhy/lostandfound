@@ -52,7 +52,11 @@ export default function App() {
     } catch (e) { console.error(e); }
   };
 
-  React.useEffect(() => { fetchData(); }, [currentAdmin]);
+  React.useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
+  }, [currentAdmin]);
 
   React.useEffect(() => {
     if (!currentAdmin) return;

@@ -57,6 +57,8 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user || user.password !== password)
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
 
+    await q('UPDATE users SET last_active=NOW() WHERE user_id=$1', [user.user_id]);
+    user.is_online = true;
     res.json({ success: true, user: sanitizeUser(user) });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
