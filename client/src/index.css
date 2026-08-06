@@ -34,6 +34,12 @@
   [lang="km"] button, [lang="km"] input, [lang="km"] select, [lang="km"] span, [lang="km"] p {
     font-family: var(--font-khmer) !important;
   }
+
+  body.lang-km .font-bold,
+  body.lang-km .font-extrabold,
+  body.lang-km .font-black {
+    font-weight: 500 !important;
+  }
 }
 
 /* ── Navbar ──────────────────────────────────── */
