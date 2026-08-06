@@ -129,10 +129,6 @@ export default function App() {
             </h1>
             <p className="text-[11px] text-slate-400 mt-0.5">LF System · Admin Control Center</p>
           </div>
-          <a href="http://localhost:3000" target="_blank" rel="noreferrer"
-            className="text-xs text-teal-700 hover:text-teal-600 font-semibold flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-xl transition-colors">
-            View User Portal →
-          </a>
         </div>
 
         {/* Page content */}
