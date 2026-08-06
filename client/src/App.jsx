@@ -200,9 +200,11 @@ export default function App() {
       if (data.success) {
         fetchData();
         alert('🎉 Item marked as returned successfully!');
+      } else {
+        alert('Error: ' + (data.message || 'Could not mark item as returned'));
       }
     } catch (e) {
-      alert('Error marking item as returned');
+      alert('Error marking item as returned: ' + e.message);
     }
   };
 
