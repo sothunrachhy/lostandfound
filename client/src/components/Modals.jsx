@@ -335,8 +335,12 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
             {recipient ? (
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="relative shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-teal-700 text-white font-bold text-sm flex items-center justify-center shadow-xs">
-                    {recipient.Name?.charAt(0).toUpperCase() || 'U'}
+                  <div className="w-9 h-9 rounded-full bg-teal-700 text-white font-bold text-sm flex items-center justify-center overflow-hidden shadow-xs border border-teal-600">
+                    {recipient.ProfileImage || recipient.profile_image ? (
+                      <img src={recipient.ProfileImage || recipient.profile_image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      recipient.Name?.charAt(0).toUpperCase() || 'U'
+                    )}
                   </div>
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
                 </div>
@@ -402,10 +406,14 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
                     }}
                     className={`flex flex-col items-center gap-1 min-w-[60px] cursor-pointer group transition-transform active:scale-95`}
                   >
-                    <div className={`relative w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-xs transition-all ${
+                    <div className={`relative w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-xs transition-all overflow-hidden ${
                       isSelected ? 'bg-teal-700 text-white ring-2 ring-teal-600 ring-offset-2' : 'bg-white text-slate-700 border border-slate-200 group-hover:border-teal-500'
                     }`}>
-                      {u.Name?.charAt(0).toUpperCase()}
+                      {u.ProfileImage || u.profile_image ? (
+                        <img src={u.ProfileImage || u.profile_image} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        u.Name?.charAt(0).toUpperCase()
+                      )}
                       <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
                     </div>
                     <span className={`text-[10px] truncate max-w-[64px] font-medium ${isSelected ? 'text-teal-800 font-bold' : 'text-slate-600'}`}>
@@ -444,8 +452,12 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
               return (
                 <div key={i} className={`flex gap-2 items-end ${isMe ? 'justify-end' : 'justify-start'}`}>
                   {!isMe && (
-                    <div className="w-6 h-6 rounded-full bg-slate-300 text-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 mb-0.5">
-                      {recipient.Name?.charAt(0).toUpperCase()}
+                    <div className="w-6 h-6 rounded-full bg-slate-300 text-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 mb-0.5 overflow-hidden border border-slate-200">
+                      {recipient.ProfileImage || recipient.profile_image ? (
+                        <img src={recipient.ProfileImage || recipient.profile_image} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        recipient.Name?.charAt(0).toUpperCase()
+                      )}
                     </div>
                   )}
                   <div className={`max-w-[78%] p-3 rounded-2xl text-xs leading-relaxed ${
