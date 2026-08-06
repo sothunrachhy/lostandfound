@@ -160,7 +160,7 @@ function AdminLoginPage({ onLogin }) {
         <form className="space-y-3.5" onSubmit={e => { e.preventDefault(); onLogin(form); }}>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1.5">Admin Email</label>
-            <input type="email" className="admin-input" placeholder="admin.safety@university.edu" value={form.email} onChange={set('email')} required />
+            <input type="email" className="admin-input" placeholder="admin123@gmail.com" value={form.email} onChange={set('email')} required />
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1.5">Password</label>

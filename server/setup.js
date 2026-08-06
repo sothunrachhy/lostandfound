@@ -140,7 +140,7 @@ async function setup() {
     // Admin User
     await client.query(`
       INSERT INTO users (student_id, name, email, phone, password, role_id, profile_image) VALUES
-        ('ADM-2024-0001', 'Chief Admin (Campus Safety)', 'admin.safety@university.edu', '+1 (555) 000-9999', 'adminpassword', 2, '')
+        ('ADM-2024-0001', 'Ah Mab', 'admin123@gmail.com', '+855 12 345 678', '88887777', 2, '')
     `);
 
     console.log('✅ Initial setup complete.');
