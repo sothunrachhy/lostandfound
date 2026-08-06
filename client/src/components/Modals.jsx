@@ -721,10 +721,15 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
             </div>
 
             <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date {isFound ? 'Found' : 'Lost'}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date & Time {isFound ? 'Found' : 'Lost'}</span>
               <p className="font-bold text-slate-800 flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-teal-600 shrink-0" />
                 {isFound ? item.DateFound : item.DateLost}
+                {item.CreatedAt && (
+                  <span className="text-xs font-medium text-slate-500 font-mono">
+                    · {new Date(item.CreatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
               </p>
             </div>
 

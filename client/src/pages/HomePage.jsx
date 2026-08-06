@@ -1,6 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Sparkles, MapPin, Calendar, Tag, MessageCircle, Plus, ArrowRight, X, RefreshCcw, AlertCircle, CheckCircle, Package, ChevronDown, Check } from 'lucide-react';
+import { Search, Sparkles, MapPin, Calendar, Tag, MessageCircle, Plus, ArrowRight, X, RefreshCcw, AlertCircle, CheckCircle, Package, ChevronDown, Check, Clock } from 'lucide-react';
 import { translations } from '../translations';
+
+const formatReportTime = (ts) => {
+  if (!ts) return null;
+  try {
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return null;
+  }
+};
 
 const DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80";
 
@@ -223,6 +232,9 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{item.LocationName}</span></div>
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Calendar className="w-3 h-3 text-slate-400 shrink-0" />Lost on {item.DateLost}</div>
+                  {item.CreatedAt && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400"><Clock className="w-3 h-3 text-slate-400 shrink-0" />Reported at {formatReportTime(item.CreatedAt)}</div>
+                  )}
                 </div>
               </div>
 
@@ -271,6 +283,9 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{item.LocationName}</span></div>
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Calendar className="w-3 h-3 text-slate-400 shrink-0" />Found on {item.DateFound}</div>
+                  {item.CreatedAt && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400"><Clock className="w-3 h-3 text-slate-400 shrink-0" />Reported at {formatReportTime(item.CreatedAt)}</div>
+                  )}
                 </div>
               </div>
 
