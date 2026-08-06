@@ -288,7 +288,7 @@ export function ClaimModal({ isOpen, onClose, foundItem, lostItem, currentUser, 
   );
 }
 
-export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, allUsers, onSelectRecipient, onSend, onFetchMessages }) {
+export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, allUsers, onSelectRecipient, onSend, onFetchMessages, onApproveDirect }) {
   const [text, setText] = useState('');
   const messagesEndRef = React.useRef(null);
 
@@ -352,6 +352,17 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Handover Banner */}
+        {recipient && onApproveDirect && (
+          <div className="bg-emerald-50 border-b border-emerald-100 px-4 py-2 flex items-center justify-between gap-2 shrink-0">
+            <span className="text-[11px] font-semibold text-emerald-800">Done talking & handed over item?</span>
+            <button onClick={() => onApproveDirect(null, recipient.UserID)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-2.5 rounded-lg shrink-0 cursor-pointer transition-colors shadow-xs">
+              Confirm Handover
+            </button>
+          </div>
+        )}
 
         {/* Message Thread */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">

@@ -188,6 +188,24 @@ export default function App() {
     if (result.success) fetchData();
   };
 
+  const handleApproveDirect = async (foundId = null, ownerId = null) => {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`${API}/api/claims/approve-direct`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ foundId, finderId: currentUser.UserID, ownerId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+        alert('🎉 Item marked as returned successfully!');
+      }
+    } catch (e) {
+      alert('Error marking item as returned');
+    }
+  };
+
   const [allUsers, setAllUsers] = useState([]);
 
   const handleFetchMessages = async (targetUserId) => {
@@ -274,6 +292,7 @@ export default function App() {
           onOpenClaim={handleOpenClaim}
           onOpenChat={handleOpenChat}
           onDeleteReport={handleDeleteReport}
+          onApproveDirect={handleApproveDirect}
         />
       </main>
 
@@ -295,7 +314,8 @@ export default function App() {
         messages={messages} currentUser={currentUser}
         recipient={chatRecipient} allUsers={allUsers}
         onSelectRecipient={(u) => { setChatRecipient(u); handleFetchMessages(u.UserID); }}
-        onSend={handleSendMessage} onFetchMessages={handleFetchMessages} />
+        onSend={handleSendMessage} onFetchMessages={handleFetchMessages}
+        onApproveDirect={handleApproveDirect} />
 
       <NotificationsDrawer isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)}
         notifications={notifications} onMarkRead={handleMarkNotifRead} />

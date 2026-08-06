@@ -99,7 +99,7 @@ function CustomSelect({ value, options, placeholder, onChange, icon: Icon, class
   );
 }
 
-export default function HomePage({ lostItems, foundItems, matches, categories, locations, currentUser, lang = 'en', onOpenReport, onOpenClaim, onOpenChat, onDeleteReport }) {
+export default function HomePage({ lostItems, foundItems, matches, categories, locations, currentUser, lang = 'en', onOpenReport, onOpenClaim, onOpenChat, onDeleteReport, onApproveDirect }) {
   const t = translations[lang] || translations.en;
   const [search, setSearch]     = useState('');
   const [catFilter, setCatFilter] = useState('');
@@ -270,10 +270,17 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                     <MessageCircle className="w-3 h-3" /> {t.chat}
                   </button>
                   {item.Status !== 'Claimed' && (
-                    <button onClick={() => onOpenClaim(item)}
-                      className="btn-primary text-[11px] py-1.5 px-3 rounded-lg cursor-pointer">
-                      {t.claimItem}
-                    </button>
+                    currentUser && currentUser.UserID === item.UserID ? (
+                      <button onClick={() => onApproveDirect && onApproveDirect(item.FoundID, null)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] py-1.5 px-3 rounded-lg cursor-pointer flex items-center gap-1 shadow-sm transition-colors">
+                        <CheckCircle className="w-3 h-3" /> Mark Returned
+                      </button>
+                    ) : (
+                      <button onClick={() => onOpenClaim(item)}
+                        className="btn-primary text-[11px] py-1.5 px-3 rounded-lg cursor-pointer">
+                        {t.claimItem}
+                      </button>
+                    )
                   )}
                 </div>
               </div>

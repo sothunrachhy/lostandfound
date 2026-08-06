@@ -394,6 +394,25 @@ app.put('/api/claims/:id/status', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+app.post('/api/claims/approve-direct', async (req, res) => {
+  const { foundId, finderId, ownerId } = req.body;
+  try {
+    if (foundId) {
+      await q(`UPDATE found_items SET status='Claimed' WHERE found_id=$1`, [foundId]);
+    }
+    if (foundId && ownerId) {
+      await q(`UPDATE claims SET status='Approved' WHERE found_id=$1 AND owner_id=$2`, [foundId, ownerId]);
+    }
+    if (ownerId) {
+      await q(
+        `INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Approval')`,
+        [ownerId, `Your item claim has been approved by the finder! The item is now marked as returned.`]
+      );
+    }
+    res.json({ success: true, message: 'Item marked as returned successfully!' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 // ══════════════════════════════════════════════════════════════════
 // NOTIFICATIONS
 // ══════════════════════════════════════════════════════════════════
