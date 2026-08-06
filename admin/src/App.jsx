@@ -6,6 +6,7 @@ import ReportsPage from './pages/ReportsPage';
 import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
 import MessagesPage from './pages/MessagesPage';
+import NotificationModal from './components/NotificationModal';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -15,6 +16,7 @@ export default function App() {
     return s ? JSON.parse(s) : null;
   });
   const [activePage,  setActivePage]  = useState('dashboard');
+  const [modalNotify, setModalNotify] = useState({ isOpen: false, title: '', message: '', type: 'success' });
   const [stats,       setStats]       = useState({});
   const [claims,      setClaims]      = useState([]);
   const [lostItems,   setLostItems]   = useState([]);
@@ -22,6 +24,10 @@ export default function App() {
   const [users,       setUsers]       = useState([]);
   const [categories,  setCategories]  = useState([]);
   const [locations,   setLocations]   = useState([]);
+
+  const notify = (title, message, type = 'success') => {
+    setModalNotify({ isOpen: true, title, message, type });
+  };
 
   const fetchData = async () => {
     if (!currentAdmin) return;
@@ -47,31 +53,33 @@ export default function App() {
       const res = await fetch(`${API}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
       const data = await res.json();
       if (data.success) {
-        if (data.user.RoleID !== 2) { alert('⛔ Admin only. Students use http://localhost:3000'); return; }
+        if (data.user.RoleID !== 2) { notify('Access Restricted', 'Admin Portal is restricted to Admin accounts.', 'info'); return; }
         localStorage.setItem('lf_admin', JSON.stringify(data.user));
         setCurrentAdmin(data.user);
-      } else { alert('Login failed: ' + data.message); }
-    } catch { alert('Cannot connect to API.'); }
+      } else { notify('Sign In Failed', data.message || 'Invalid credentials', 'error'); }
+    } catch { notify('Connection Error', 'Cannot connect to API server.', 'error'); }
   };
 
   const handleLogout = () => { localStorage.removeItem('lf_admin'); setCurrentAdmin(null); };
-  const handleUpdateClaim = async (id, status, notes) => { await fetch(`${API}/api/claims/${id}/status`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status, adminNotes: notes }) }); fetchData(); };
-  const handleDeleteReport = async (type, id) => { await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' }); fetchData(); };
-  const handleAddCategory  = async (name) => { await fetch(`${API}/api/categories`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); };
-  const handleUpdateCategory = async (id, name) => { await fetch(`${API}/api/categories/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); };
+  const handleUpdateClaim = async (id, status, notes) => { await fetch(`${API}/api/claims/${id}/status`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status, adminNotes: notes }) }); fetchData(); notify('Claim Updated', `Claim #${id} status set to ${status}`, 'success'); };
+  const handleDeleteReport = async (type, id) => { await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' }); fetchData(); notify('Report Deleted', 'Report removed from database', 'info'); };
+  const handleAddCategory  = async (name) => { await fetch(`${API}/api/categories`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Created', `Category "${name}" added.`, 'success'); };
+  const handleUpdateCategory = async (id, name) => { await fetch(`${API}/api/categories/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Updated', 'Category changes saved.', 'success'); };
   const handleDeleteCategory = async (id) => {
     const res = await fetch(`${API}/api/categories/${id}`, { method: 'DELETE' });
     const data = await res.json();
-    if (data.message && !data.success) alert(data.message);
+    if (data.message && !data.success) notify('Cannot Delete Category', data.message, 'error');
+    else notify('Category Deleted', 'Category removed.', 'info');
     fetchData();
   };
 
-  const handleAddLocation  = async (name) => { await fetch(`${API}/api/locations`,  { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ LocationName: name }) }); fetchData(); };
-  const handleUpdateLocation = async (id, name) => { await fetch(`${API}/api/locations/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ LocationName: name }) }); fetchData(); };
+  const handleAddLocation  = async (name) => { await fetch(`${API}/api/locations`,  { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ LocationName: name }) }); fetchData(); notify('Location Created', `Location "${name}" added.`, 'success'); };
+  const handleUpdateLocation = async (id, name) => { await fetch(`${API}/api/locations/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ LocationName: name }) }); fetchData(); notify('Location Updated', 'Location changes saved.', 'success'); };
   const handleDeleteLocation = async (id) => {
     const res = await fetch(`${API}/api/locations/${id}`, { method: 'DELETE' });
     const data = await res.json();
-    if (data.message && !data.success) alert(data.message);
+    if (data.message && !data.success) notify('Cannot Delete Location', data.message, 'error');
+    else notify('Location Deleted', 'Location removed.', 'info');
     fetchData();
   };
 
@@ -125,6 +133,9 @@ export default function App() {
           )}
         </main>
       </div>
+
+      <NotificationModal isOpen={modalNotify.isOpen} onClose={() => setModalNotify(m => ({ ...m, isOpen: false }))}
+        title={modalNotify.title} message={modalNotify.message} type={modalNotify.type} />
     </div>
   );
 }

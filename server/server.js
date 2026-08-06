@@ -306,8 +306,18 @@ app.post('/api/found-items', async (req, res) => {
 });
 
 app.delete('/api/found-items/:id', async (req, res) => {
-  await q('DELETE FROM found_items WHERE found_id = $1', [req.params.id]);
-  res.json({ success: true });
+  await q(`DELETE FROM found_items WHERE found_id=$1`, [req.params.id]);
+  res.json({ success: true, message: 'Item deleted' });
+});
+
+app.put('/api/found-items/:id/status', async (req, res) => {
+  const { status } = req.body;
+  try {
+    await q(`UPDATE found_items SET status=$1 WHERE found_id=$2`, [status || 'Claimed', req.params.id]);
+    res.json({ success: true, message: `Item status updated to ${status || 'Claimed'}` });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
 });
 
 // ══════════════════════════════════════════════════════════════════

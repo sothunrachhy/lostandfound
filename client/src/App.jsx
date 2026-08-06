@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
-import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal } from './components/Modals';
+import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal } from './components/Modals';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export default function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('lf_lang') || 'en');
+  const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
 
   useEffect(() => {
     document.documentElement.setAttribute('lang', lang);
@@ -79,6 +80,10 @@ export default function App() {
 
   useEffect(() => { fetchData(); }, [currentUser]);
 
+  const notify = (title, message, type = 'success') => {
+    setSuccessModal({ isOpen: true, title, message, type });
+  };
+
   const handleLogin = async ({ email, password }) => {
     try {
       const res = await fetch(`${API}/api/auth/login`, {
@@ -90,17 +95,17 @@ export default function App() {
       if (data.success) {
         // Block admin from user portal
         if (data.user.RoleID === 2) {
-          alert('⛔ Admins must use the Admin Portal at http://localhost:3001');
+          notify('Admin Account Detected', 'Admins must sign in via the Admin Portal.', 'info');
           return;
         }
         localStorage.setItem('lf_user', JSON.stringify(data.user));
         setCurrentUser(data.user);
         setShowLogin(false);
       } else {
-        alert('Login failed: ' + data.message);
+        notify('Sign In Failed', data.message || 'Invalid email or password', 'error');
       }
     } catch (e) {
-      alert('Cannot connect to server. Is the API running?');
+      notify('Connection Error', 'Cannot connect to server. Is the backend running?', 'error');
     }
   };
 
@@ -117,10 +122,10 @@ export default function App() {
         setCurrentUser(data.user);
         setShowLogin(false);
       } else {
-        alert('Registration failed: ' + data.message);
+        notify('Registration Failed', data.message, 'error');
       }
     } catch (e) {
-      alert('Cannot connect to server.');
+      notify('Connection Error', 'Cannot connect to server.', 'error');
     }
   };
 
@@ -141,11 +146,12 @@ export default function App() {
       if (data.success) {
         localStorage.setItem('lf_user', JSON.stringify(data.user));
         setCurrentUser(data.user);
+        notify('Profile Updated!', 'Your profile information has been saved successfully.', 'success');
       } else {
-        alert('Failed to update profile: ' + data.message);
+        notify('Update Failed', data.message, 'error');
       }
     } catch (e) {
-      alert('Error updating profile');
+      notify('Error', 'Failed to update profile. Please try again.', 'error');
     }
   };
 
@@ -160,17 +166,19 @@ export default function App() {
       const result = await res.json();
       if (result.success) {
         fetchData();
+        notify('Report Created!', 'Your report has been published to the campus board.', 'success');
       } else {
-        alert('Could not submit report: ' + (result.message || 'Unknown error'));
+        notify('Submission Failed', result.message || 'Unknown error', 'error');
       }
     } catch (e) {
-      alert('Error submitting report: Cannot connect to server.');
+      notify('Connection Error', 'Error submitting report. Cannot connect to server.', 'error');
     }
   };
 
   const handleDeleteReport = async (type, id) => {
     await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' });
     fetchData();
+    notify('Report Deleted', 'The report has been removed.', 'info');
   };
 
   const handleOpenClaim = (foundItem, lostItem = null) => {
@@ -185,12 +193,28 @@ export default function App() {
       body: JSON.stringify(data)
     });
     const result = await res.json();
-    if (result.success) fetchData();
+    if (result.success) {
+      fetchData();
+      notify('Claim Submitted!', 'Your ownership verification claim was sent.', 'success');
+    }
   };
 
   const handleApproveDirect = async (foundId = null, ownerId = null) => {
     if (!currentUser) return;
     try {
+      if (foundId) {
+        const res = await fetch(`${API}/api/found-items/${foundId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Claimed' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          fetchData();
+          notify('🎉 Item Returned!', 'The item has been successfully marked as returned and updated across the platform.', 'success');
+          return;
+        }
+      }
       const res = await fetch(`${API}/api/claims/approve-direct`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -199,12 +223,12 @@ export default function App() {
       const data = await res.json();
       if (data.success) {
         fetchData();
-        alert('🎉 Item marked as returned successfully!');
+        notify('🎉 Item Returned!', 'The item has been successfully marked as returned and updated across the platform.', 'success');
       } else {
-        alert('Error: ' + (data.message || 'Could not mark item as returned'));
+        notify('Update Error', data.message || 'Could not mark item as returned', 'error');
       }
     } catch (e) {
-      alert('Error marking item as returned: ' + e.message);
+      notify('Update Error', 'Error marking item as returned: ' + e.message, 'error');
     }
   };
 
@@ -324,6 +348,9 @@ export default function App() {
 
       <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
         currentUser={currentUser} onSaveProfile={handleSaveProfile} />
+
+      <NotificationModal isOpen={successModal.isOpen} onClose={() => setSuccessModal(s => ({ ...s, isOpen: false }))}
+        title={successModal.title} message={successModal.message} type={successModal.type} />
     </div>
   );
 }
