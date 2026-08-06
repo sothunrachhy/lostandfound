@@ -9,7 +9,7 @@ import MessagesPage from './pages/MessagesPage';
 import NotificationModal from './components/NotificationModal';
 import AdminProfileModal from './components/AdminProfileModal';
 
-const API = import.meta.env.VITE_API_BASE_URL || 'https://lostfound.wtf';
+const API = import.meta.env.VITE_API_BASE_URL || 'https://lostandfound-two-lovat.vercel.app';
 
 export default function App() {
   const [currentAdmin, setCurrentAdmin] = useState(() => {
