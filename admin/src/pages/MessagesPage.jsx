@@ -106,11 +106,18 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
                     isSelected ? 'bg-teal-50/80 border-l-4 border-teal-600' : 'hover:bg-white'
                   }`}
                 >
-                  <img
-                    src={u.ProfileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.Name)}`}
-                    alt=""
-                    className="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0"
-                  />
+                  <div className="relative shrink-0">
+                    <img
+                      src={u.ProfileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.Name)}`}
+                      alt=""
+                      className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                    />
+                    <span
+                      className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${
+                        u.isOnline || u.IsOnline ? 'bg-emerald-500' : 'bg-slate-300'
+                      }`}
+                    />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
                       <p className={`text-xs font-bold truncate ${isSelected ? 'text-teal-900' : 'text-slate-800'}`}>

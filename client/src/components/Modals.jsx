@@ -406,15 +406,22 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
                     }}
                     className={`flex flex-col items-center gap-1 min-w-[60px] cursor-pointer group transition-transform active:scale-95`}
                   >
-                    <div className={`relative w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-xs transition-all overflow-hidden ${
-                      isSelected ? 'bg-teal-700 text-white ring-2 ring-teal-600 ring-offset-2' : 'bg-white text-slate-700 border border-slate-200 group-hover:border-teal-500'
-                    }`}>
-                      {u.ProfileImage || u.profile_image ? (
-                        <img src={u.ProfileImage || u.profile_image} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        u.Name?.charAt(0).toUpperCase()
-                      )}
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                    <div className="relative shrink-0">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-xs transition-all overflow-hidden ${
+                        isSelected ? 'bg-teal-700 text-white ring-2 ring-teal-600 ring-offset-2' : 'bg-white text-slate-700 border border-slate-200 group-hover:border-teal-500'
+                      }`}>
+                        {u.ProfileImage || u.profile_image ? (
+                          <img src={u.ProfileImage || u.profile_image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          u.Name?.charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white shadow-xs ${
+                          u.isOnline || u.IsOnline || u.RoleID === 2 ? 'bg-emerald-500' : 'bg-slate-300'
+                        }`}
+                        title={u.isOnline || u.IsOnline || u.RoleID === 2 ? 'Online' : 'Offline'}
+                      />
                     </div>
                     <span className={`text-[10px] truncate max-w-[64px] font-medium ${isSelected ? 'text-teal-800 font-bold' : 'text-slate-600'}`}>
                       {u.Name?.split(' ')[0]}
