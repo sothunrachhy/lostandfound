@@ -82,3 +82,53 @@ export const translations = {
     noMessagesYet: "មិនទាន់មានសារនៅឡើយទេ។",
   }
 };
+
+export const categoryTranslations = {
+  "Electronics & Gadgets": "ឧបករណ៍អេឡិចត្រូនិក",
+  "IDs & Cards": "កាតសម្គាល់ខ្លួន & កាតផ្សេងៗ",
+  "Bags & Wallets": "កាបូបយួរ & កាបូបលុយ",
+  "Keys & Lanyards": "សោ & ខ្សែពាក់សោ",
+  "Books & Stationery": "សៀវភៅ & ឧបករណ៍សិក្សា",
+  "Apparel & Accessories": "សម្លៀកបំពាក់ & គ្រឿងអលង្ការ",
+  "Other Items": "វត្ថុផ្សេងៗ"
+};
+
+export const locationTranslations = {
+  "RUPP Campus 1 — Building A (Humanities)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ A",
+  "RUPP Campus 1 — Building B (Science & IT)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ B",
+  "RUPP Campus 1 — IFL (Institute of Foreign Languages)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — IFL",
+  "RUPP Campus 1 — Central Library (បណ្ណាល័យ)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — បណ្ណាល័យកណ្តាល",
+  "RUPP Campus 1 — Sports Field & Canteen": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — តារាងកីឡា & អាហារដ្ឋាន",
+  "RUPP Campus 2 — Faculty of Engineering (FE)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ២ — មហាវិទ្យាល័យវិស្វកម្ម",
+  "RUPP Campus 2 — Main Classroom Block": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ២ — អាគារសិក្សាបន្ទប់មេ",
+  "RUPP — Building T": "RUPP — អាគារ T",
+  "RUPP — Building C": "RUPP — អាគារ C",
+  "RUPP — Building D": "RUPP — អាគារ D",
+  "RUPP — IT Building B": "RUPP — អាគារ IT B",
+  "RUPP — STEM Building": "RUPP — អាគារ STEM",
+  "RUPP — Faculty of Engineering": "RUPP — មហាវិទ្យាល័យវិស្វកម្ម",
+  "RUPP — Football Field": "RUPP — តារាងបាល់ទាត់",
+  "RUPP — Canteen (Cantinee RUPP)": "RUPP — អាហារដ្ឋាន",
+  "RUPP — DMC Café": "RUPP — DMC Café",
+  "RUPP — Motorcycle Parking": "RUPP — ទីតាំងផ្ញើម៉ូតូ",
+  "RUPP — Auditorium": "RUPP — សាលប្រជុំ",
+  "RUPP — Central Library (បណ្ណាល័យ)": "RUPP — បណ្ណាល័យកណ្តាល",
+  "RUPP — IFL (Institute of Foreign Languages)": "RUPP — IFL (វិទ្យាស្ថានភាសាបរទេស)"
+};
+
+export function getCategoryName(name, lang = 'en') {
+  if (!name) return '';
+  if (lang === 'km' && categoryTranslations[name]) {
+    return categoryTranslations[name];
+  }
+  return name;
+}
+
+export function getLocationName(name, lang = 'en') {
+  if (!name) return '';
+  if (lang === 'km' && locationTranslations[name]) {
+    return locationTranslations[name];
+  }
+  return name;
+}
+

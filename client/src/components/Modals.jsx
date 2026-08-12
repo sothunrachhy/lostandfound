@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search, MapPin, Calendar, Tag, MessageCircle } from 'lucide-react';
+import { getCategoryName, getLocationName } from '../translations';
 
 const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
   const reader = new FileReader();
@@ -18,12 +19,12 @@ const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
 
         if (width > height) {
           if (width > maxDimension) {
-            height = Math.round(height * (maxDimension / width));
+            height = Math.round((height * maxDimension) / width);
             width = maxDimension;
           }
         } else {
           if (height > maxDimension) {
-            width = Math.round(width * (maxDimension / height));
+            width = Math.round((width * maxDimension) / height);
             height = maxDimension;
           }
         }
@@ -32,14 +33,16 @@ const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        callback(canvas.toDataURL('image/jpeg', quality));
+
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        callback(compressed || rawDataUrl);
       } catch (err) {
-        console.warn("Canvas compression fallback used:", err);
+        console.error("Canvas compression error:", err);
         callback(rawDataUrl);
       }
     };
     img.onerror = () => {
-      console.warn("Image load fallback used");
+      console.error("Image load failed");
       callback(rawDataUrl);
     };
     img.src = rawDataUrl;
@@ -68,7 +71,7 @@ function CustomSelectModal({ value, options, placeholder, onChange, className = 
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white border border-slate-300 hover:border-teal-600 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 flex items-center justify-between gap-2 shadow-xs transition-all cursor-pointer h-full min-h-[38px]"
+        className="w-full bg-slate-50 border border-slate-200 hover:border-teal-600 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 flex items-center justify-between shadow-xs transition-all cursor-pointer h-full min-h-[38px]"
       >
         <span className="truncate">
           {selectedOption ? selectedOption.label : placeholder}
@@ -100,7 +103,7 @@ function CustomSelectModal({ value, options, placeholder, onChange, className = 
   );
 }
 
-export function ReportModal({ isOpen, onClose, mode, categories, locations, currentUser, onSubmit }) {
+export function ReportModal({ isOpen, onClose, mode, categories, locations, currentUser, onSubmit, lang = 'en' }) {
   const [form, setForm] = useState({ ItemName: '', Brand: '', Color: '', CategoryID: '', LocationID: '', date: new Date().toISOString().split('T')[0], Description: '', Image: '' });
   const [isCompressing, setIsCompressing] = useState(false);
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
@@ -182,7 +185,7 @@ export function ReportModal({ isOpen, onClose, mode, categories, locations, curr
               <label className="block text-xs font-bold text-slate-600 mb-1">Category *</label>
               <CustomSelectModal
                 value={form.CategoryID}
-                options={categories.map(c => ({ id: c.CategoryID, label: c.CategoryName }))}
+                options={categories.map(c => ({ id: c.CategoryID, label: getCategoryName(c.CategoryName, lang) }))}
                 placeholder="Select Category"
                 onChange={(val) => setForm(f => ({ ...f, CategoryID: val }))}
               />
@@ -191,7 +194,7 @@ export function ReportModal({ isOpen, onClose, mode, categories, locations, curr
               <label className="block text-xs font-bold text-slate-600 mb-1">Location *</label>
               <CustomSelectModal
                 value={form.LocationID}
-                options={locations.map(l => ({ id: l.LocationID, label: l.LocationName }))}
+                options={locations.map(l => ({ id: l.LocationID, label: getLocationName(l.LocationName, lang) }))}
                 placeholder="Select Location"
                 onChange={(val) => setForm(f => ({ ...f, LocationID: val }))}
               />

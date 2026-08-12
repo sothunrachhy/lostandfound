@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Sparkles, MapPin, Calendar, Tag, MessageCircle, Plus, ArrowRight, X, RefreshCcw, AlertCircle, CheckCircle, Package, ChevronDown, Check, Clock } from 'lucide-react';
-import { translations } from '../translations';
+import { translations, getCategoryName, getLocationName } from '../translations';
 
 const formatReportTime = (item) => {
   const ts = item?.CreatedAt || item?.created_at || item?.Timestamp;
@@ -131,8 +131,8 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
 
   const hasFilters = search || catFilter || locFilter;
 
-  const categoryOptions = categories.map(c => ({ id: c.CategoryID, label: c.CategoryName }));
-  const locationOptions = locations.map(l => ({ id: l.LocationID, label: l.LocationName }));
+  const categoryOptions = categories.map(c => ({ id: c.CategoryID, label: getCategoryName(c.CategoryName, lang) }));
+  const locationOptions = locations.map(l => ({ id: l.LocationID, label: getLocationName(l.LocationName, lang) }));
 
   return (
     <div className="space-y-7 pb-24 fade-up">
@@ -233,7 +233,7 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{item.Description || 'No description provided.'}</p>
                 <div className="space-y-1 pt-2 border-t border-slate-100">
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{item.LocationName}</span></div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{getLocationName(item.LocationName, lang)}</span></div>
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
                     <Calendar className="w-3 h-3 text-teal-600 shrink-0" />
                     Lost on {item.DateLost} at {item.ReportTime || formatReportTime(item)}
@@ -284,7 +284,7 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{item.Description || 'No description provided.'}</p>
                 <div className="space-y-1 pt-2 border-t border-slate-100">
                   {item.Brand && <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><Tag className="w-3 h-3 text-teal-500 shrink-0" />{item.Brand} · {item.Color}</div>}
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{item.LocationName}</span></div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500"><MapPin className="w-3 h-3 text-teal-500 shrink-0" /><span className="truncate">{getLocationName(item.LocationName, lang)}</span></div>
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
                     <Calendar className="w-3 h-3 text-teal-600 shrink-0" />
                     Found on {item.DateFound} at {item.ReportTime || formatReportTime(item)}

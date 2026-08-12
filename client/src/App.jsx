@@ -362,7 +362,7 @@ export default function App() {
 
       <ReportModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)}
         mode={reportMode} categories={categories} locations={locations}
-        currentUser={currentUser} onSubmit={handleSubmitReport} />
+        currentUser={currentUser} onSubmit={handleSubmitReport} lang={lang} />
 
       <ClaimModal isOpen={isClaimOpen} onClose={() => setIsClaimOpen(false)}
         foundItem={claimFoundItem} lostItem={claimLostItem}
