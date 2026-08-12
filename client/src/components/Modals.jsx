@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search, MapPin, Calendar, Tag, MessageCircle } from 'lucide-react';
+import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search, MapPin, Calendar, Tag, MessageCircle, LogOut, AlertCircle } from 'lucide-react';
 import { getCategoryName, getLocationName } from '../translations';
 
 const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
@@ -667,40 +667,42 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
   const isOwnerOrFinder = currentUser && currentUser.UserID === item.UserID;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-100 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200 my-8">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto min-h-screen">
+      <div className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200 my-auto max-h-[92vh] flex flex-col">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm cursor-pointer transition-colors"
+          className="absolute top-3.5 right-3.5 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-md cursor-pointer transition-all active:scale-90"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
         {/* Full Image Lightbox Header */}
-        <div className="relative bg-slate-900 flex items-center justify-center max-h-[420px] overflow-hidden group">
+        <div className="relative bg-slate-950 flex items-center justify-center min-h-[220px] max-h-[280px] sm:max-h-[380px] overflow-hidden group shrink-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/20 pointer-events-none z-0" />
+
           {item.Image ? (
             <img
               src={item.Image}
               alt={item.ItemName}
-              className="w-full h-full object-contain max-h-[420px] transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-contain min-h-[220px] max-h-[280px] sm:max-h-[380px] transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="h-64 flex flex-col items-center justify-center text-slate-500 gap-2">
-              <Upload className="w-12 h-12 opacity-40" />
+            <div className="h-52 flex flex-col items-center justify-center text-slate-400 gap-2">
+              <Upload className="w-10 h-10 opacity-40" />
               <p className="text-xs font-semibold">No Image Provided</p>
             </div>
           )}
 
           {/* Badges */}
-          <div className="absolute top-4 left-4 flex gap-2">
-            <span className={`text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md ${
-              isFound ? 'bg-teal-600 text-white' : 'bg-rose-600 text-white'
+          <div className="absolute top-3.5 left-3.5 z-10 flex gap-2">
+            <span className={`text-[11px] sm:text-xs font-black uppercase px-2.5 py-1 rounded-xl shadow-md backdrop-blur-sm ${
+              isFound ? 'bg-teal-600/90 text-white' : 'bg-rose-600/90 text-white'
             }`}>
               {isFound ? 'Found Item' : 'Lost Item'}
             </span>
             {item.Status === 'Claimed' && (
-              <span className="text-xs font-black uppercase px-3 py-1 rounded-xl shadow-md bg-amber-600 text-white">
+              <span className="text-[11px] sm:text-xs font-black uppercase px-2.5 py-1 rounded-xl shadow-md bg-amber-600/90 text-white backdrop-blur-sm">
                 Claimed
               </span>
             )}
@@ -708,24 +710,24 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
         </div>
 
         {/* Content Details */}
-        <div className="p-6 space-y-5">
-          <div className="space-y-1.5">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{item.ItemName}</h2>
-            <p className="text-sm text-slate-600 leading-relaxed">{item.Description || 'No additional details provided.'}</p>
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
+          <div className="space-y-1">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug break-words">{item.ItemName}</h2>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed break-words">{item.Description || 'No additional details provided.'}</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-100 text-xs">
-            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-100 text-xs">
+            <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Campus Location</span>
-              <p className="font-bold text-slate-800 flex items-center gap-1.5">
+              <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                 <MapPin className="w-4 h-4 text-teal-600 shrink-0" />
                 {item.LocationName || 'Campus Building'}
               </p>
             </div>
 
-            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+            <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date & Time {isFound ? 'Found' : 'Lost'}</span>
-              <p className="font-bold text-slate-800 flex items-center gap-1.5">
+              <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                 <Calendar className="w-4 h-4 text-teal-600 shrink-0" />
                 {isFound ? item.DateFound : item.DateLost}
                 {item.CreatedAt && (
@@ -737,9 +739,9 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
             </div>
 
             {item.Brand && (
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+              <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Brand / Make</span>
-                <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                   <Tag className="w-4 h-4 text-teal-600 shrink-0" />
                   {item.Brand}
                 </p>
@@ -747,9 +749,9 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
             )}
 
             {item.Color && (
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1">
+              <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color</span>
-                <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                   <Tag className="w-4 h-4 text-teal-600 shrink-0" />
                   {item.Color}
                 </p>
@@ -757,17 +759,17 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
             )}
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs">
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-100 text-xs">
             <span className="text-slate-400 font-medium">
               Reported by <strong className="text-slate-700 font-bold">{item.FinderName || item.OwnerName || 'Campus Member'}</strong>
             </span>
           </div>
 
           {/* Action Footer */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-2">
             <button
               onClick={() => { onClose(); onOpenChat(item.UserID); }}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-3 rounded-2xl cursor-pointer flex items-center gap-1.5 transition-colors"
+              className="w-full sm:w-auto justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-3 rounded-xl sm:rounded-2xl cursor-pointer flex items-center gap-1.5 transition-colors"
             >
               <MessageCircle className="w-4 h-4 text-teal-600" />
               Chat with Reporter
@@ -777,7 +779,7 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
               isOwnerOrFinder ? (
                 <button
                   onClick={() => { onClose(); onApproveDirect && onApproveDirect(item.FoundID, null); }}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-2xl cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all active:scale-95"
+                  className="w-full sm:w-auto justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl sm:rounded-2xl cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all active:scale-95"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   Mark Returned
@@ -785,7 +787,7 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
               ) : (
                 <button
                   onClick={() => { onClose(); onOpenClaim(item); }}
-                  className="btn-primary text-xs px-5 py-3 rounded-2xl cursor-pointer font-bold shadow-md active:scale-95"
+                  className="w-full sm:w-auto justify-center btn-primary text-xs px-5 py-3 rounded-xl sm:rounded-2xl cursor-pointer font-bold shadow-md active:scale-95"
                 >
                   Claim This Item
                 </button>
@@ -798,26 +800,46 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
   );
 }
 
-export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete' }) {
+export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete', variant }) {
   if (!isOpen) return null;
 
+  const textLower = (confirmText + ' ' + (title || '')).toLowerCase();
+  const isDelete = variant === 'danger' || textLower.includes('delete') || textLower.includes('remove');
+  const isLogout = variant === 'warning' || textLower.includes('sign out') || textLower.includes('logout');
+
+  // Dynamic button color styling
+  const btnColorClass = isDelete
+    ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/25'
+    : isLogout
+    ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/25'
+    : 'bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-600/25';
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4 relative animate-in zoom-in-95 duration-200 my-auto">
-        <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer">
+    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl text-center space-y-4 relative animate-in zoom-in-95 duration-200 my-auto">
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
+        >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="space-y-1.5 pt-2">
-          <h3 className="text-lg font-black text-slate-900 tracking-tight">{title || 'Are you sure?'}</h3>
-          <p className="text-xs font-semibold text-slate-500 leading-relaxed px-2">{message}</p>
+        {/* Text Details */}
+        <div className="space-y-2 pt-2">
+          <h3 className="text-xl font-black text-slate-900 tracking-tight leading-snug">{title || 'Are you sure?'}</h3>
+          {message && (
+            <p className="text-xs font-semibold text-slate-500 leading-relaxed px-1 break-words">
+              {message}
+            </p>
+          )}
         </div>
 
+        {/* Buttons */}
         <div className="flex gap-2.5 pt-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-2xl cursor-pointer transition-colors"
+            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-2xl cursor-pointer transition-all active:scale-95"
           >
             Cancel
           </button>
@@ -827,7 +849,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confi
               onConfirm();
               onClose();
             }}
-            className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 rounded-2xl cursor-pointer transition-all shadow-md shadow-rose-600/20 active:scale-[0.98]"
+            className={`flex-1 font-bold text-xs py-3 rounded-2xl cursor-pointer transition-all active:scale-95 ${btnColorClass}`}
           >
             {confirmText}
           </button>
