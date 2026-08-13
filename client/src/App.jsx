@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal, ItemDetailModal, ConfirmModal } from './components/Modals';
+import { translations } from './translations';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -146,19 +147,21 @@ export default function App() {
     }
   };
 
+  const t = translations[lang] || translations.en;
+
   const handleLogout = () => {
     localStorage.removeItem('lf_user');
     setCurrentUser(null);
     setShowLogin(true);
-    notify('Signed Out', 'You have been signed out successfully.', 'info');
+    notify(t.signedOutTitle || 'Signed Out', t.signedOutMsg || 'You have been signed out successfully.', 'info');
   };
 
   const promptLogout = () => {
     setLogoutConfirmModal({
       isOpen: true,
-      title: 'Sign Out?',
-      message: 'Are you sure you want to sign out of your account?',
-      confirmText: 'Sign Out',
+      title: t.signOutTitle || 'Sign Out?',
+      message: t.signOutMsg || 'Are you sure you want to sign out of your account?',
+      confirmText: t.signOutBtn || 'Sign Out',
       onConfirm: handleLogout
     });
   };
@@ -174,12 +177,12 @@ export default function App() {
       if (data.success) {
         localStorage.setItem('lf_user', JSON.stringify(data.user));
         setCurrentUser(data.user);
-        notify('Profile Updated!', 'Your profile information has been saved successfully.', 'success');
+        notify(t.profileUpdatedTitle || 'Profile Updated!', t.profileUpdatedMsg || 'Your profile information has been saved successfully.', 'success');
       } else {
         notify('Update Failed', data.message, 'error');
       }
     } catch (e) {
-      notify('Error', 'Failed to update profile. Please try again.', 'error');
+      notify(t.connectionError || 'Error', 'Failed to update profile. Please try again.', 'error');
     }
   };
 
@@ -194,19 +197,19 @@ export default function App() {
       const result = await res.json();
       if (result.success) {
         fetchData();
-        notify('Report Created!', 'Your report has been published to the campus board.', 'success');
+        notify(t.reportCreatedTitle || 'Report Created!', t.reportCreatedMsg || 'Your report has been published to the campus board.', 'success');
       } else {
         notify('Submission Failed', result.message || 'Unknown error', 'error');
       }
     } catch (e) {
-      notify('Connection Error', 'Error submitting report. Cannot connect to server.', 'error');
+      notify(t.connectionError || 'Connection Error', 'Error submitting report. Cannot connect to server.', 'error');
     }
   };
 
   const handleDeleteReport = async (type, id) => {
     await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' });
     fetchData();
-    notify('Report Deleted', 'The report has been removed.', 'info');
+    notify(t.deleteReportTitle || 'Report Deleted', t.deleteReportSuccess || 'The report has been removed.', 'info');
   };
 
   const handleOpenClaim = (foundItem, lostItem = null) => {
@@ -223,7 +226,7 @@ export default function App() {
     const result = await res.json();
     if (result.success) {
       fetchData();
-      notify('Claim Submitted!', 'Your ownership verification claim was sent.', 'success');
+      notify(t.claimSubmittedTitle || 'Claim Submitted!', t.claimSubmittedMsg || 'Your ownership verification claim was sent.', 'success');
     }
   };
 
@@ -363,7 +366,7 @@ export default function App() {
 
       <ClaimModal isOpen={isClaimOpen} onClose={() => setIsClaimOpen(false)}
         foundItem={claimFoundItem} lostItem={claimLostItem}
-        currentUser={currentUser} onSubmit={handleSubmitClaim} />
+        currentUser={currentUser} onSubmit={handleSubmitClaim} lang={lang} />
 
       <ChatDrawer isOpen={isChatOpen} onClose={() => setIsChatOpen(false)}
         messages={messages} currentUser={currentUser}
@@ -380,13 +383,14 @@ export default function App() {
 
       <ItemDetailModal isOpen={!!selectedDetailItem} onClose={() => setSelectedDetailItem(null)}
         item={selectedDetailItem} currentUser={currentUser} onOpenChat={handleOpenChat}
-        onOpenClaim={handleOpenClaim} onApproveDirect={handleApproveDirect} onDeleteReport={handleDeleteReport} />
+        onOpenClaim={handleOpenClaim} onApproveDirect={handleApproveDirect} onDeleteReport={handleDeleteReport} lang={lang} />
 
       <NotificationModal isOpen={successModal.isOpen} onClose={() => setSuccessModal(s => ({ ...s, isOpen: false }))}
         title={successModal.title} message={successModal.message} type={successModal.type} />
 
       <ConfirmModal isOpen={logoutConfirmModal.isOpen} onClose={() => setLogoutConfirmModal(s => ({ ...s, isOpen: false }))}
-        title={logoutConfirmModal.title} message={logoutConfirmModal.message} confirmText={logoutConfirmModal.confirmText} onConfirm={logoutConfirmModal.onConfirm} />
+        title={logoutConfirmModal.title} message={logoutConfirmModal.message} confirmText={logoutConfirmModal.confirmText}
+        cancelText={t.cancel} lang={lang} onConfirm={logoutConfirmModal.onConfirm} />
     </div>
   );
 }

@@ -39,6 +39,26 @@ export const translations = {
     submitClaim: "Submit Claim",
     typeAMessage: "Type a message...",
     noMessagesYet: "No messages yet.",
+
+    // Confirmation & Prompts
+    signOutTitle: "Sign Out?",
+    signOutMsg: "Are you sure you want to sign out of your account?",
+    signOutBtn: "Sign Out",
+    signedOutTitle: "Signed Out",
+    signedOutMsg: "You have been signed out successfully.",
+    deleteReportTitle: "Delete Report?",
+    deleteReportMsg: "Are you sure you want to delete this report? This action cannot be undone.",
+    deleteReportSuccess: "The report has been removed.",
+    reportCreatedTitle: "Report Created!",
+    reportCreatedMsg: "Your report has been published to the campus board.",
+    claimSubmittedTitle: "Claim Submitted!",
+    claimSubmittedMsg: "Your ownership verification claim was sent.",
+    itemReturnedTitle: "🎉 Item Returned!",
+    itemReturnedMsg: "The item has been successfully marked as returned.",
+    profileUpdatedTitle: "Profile Updated!",
+    profileUpdatedMsg: "Your profile information has been saved successfully.",
+    signInFailed: "Sign In Failed",
+    connectionError: "Cannot connect to server."
   },
   km: {
     // Navbar & Buttons
@@ -80,6 +100,26 @@ export const translations = {
     submitClaim: "ផ្ញើការទាមទារ",
     typeAMessage: "សរសេរសារ...",
     noMessagesYet: "មិនទាន់មានសារនៅឡើយទេ។",
+
+    // Confirmation & Prompts
+    signOutTitle: "ចាកចេញ?",
+    signOutMsg: "តើអ្នកប្រាកដជាចង់ចាកចេញពីគណនីរបស់អ្នកឬ?",
+    signOutBtn: "ចាកចេញ",
+    signedOutTitle: "បានចាកចេញ",
+    signedOutMsg: "អ្នកបានចាកចេញដោយជោគជ័យ។",
+    deleteReportTitle: "លុបរបាយការណ៍?",
+    deleteReportMsg: "តើអ្នកប្រាកដជាចង់លុបរបាយការណ៍នេះឬ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+    deleteReportSuccess: "របាយការណ៍ត្រូវបានលុបរួចរាល់។",
+    reportCreatedTitle: "របាយការណ៍ត្រូវបានបង្កើត!",
+    reportCreatedMsg: "របាយការណ៍របស់អ្នកត្រូវបានប្រកាសនៅលើក្ដារព័ត៌មាន campus រួចរាល់។",
+    claimSubmittedTitle: "ការទាមទារត្រូវបានផ្ញើ!",
+    claimSubmittedMsg: "ការទាមទារផ្ទៀងផ្ទាត់កម្មសិទ្ធិរបស់អ្នកត្រូវបានផ្ញើរួចរាល់។",
+    itemReturnedTitle: "🎉 វត្ថុត្រូវបានប្រគល់ជូនវិញ!",
+    itemReturnedMsg: "វត្ថុត្រូវបានកំណត់ត្រឹមត្រូវថានៅប្រគល់ជូនវិញរួចរាល់។",
+    profileUpdatedTitle: "ព័ត៌មានផ្ទាល់ខ្លួនត្រូវបានធ្វើបច្ចុប្បន្នភាព!",
+    profileUpdatedMsg: "ព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នកត្រូវបានរក្សាទុកដោយជោគជ័យ។",
+    signInFailed: "ការចូលគណនីបរាជ័យ",
+    connectionError: "មិនអាចភ្ជាប់ទៅម៉ាស៊ីនបម្រើបានទេ។"
   },
   ja: {
     // Navbar & Buttons
@@ -121,6 +161,26 @@ export const translations = {
     submitClaim: "申請を送信",
     typeAMessage: "メッセージを入力...",
     noMessagesYet: "まだメッセージはありません。",
+
+    // Confirmation & Prompts
+    signOutTitle: "サインアウトしますか？",
+    signOutMsg: "本当にアカウントからサインアウトしますか？",
+    signOutBtn: "サインアウト",
+    signedOutTitle: "サインアウトしました",
+    signedOutMsg: "正常にサインアウトしました。",
+    deleteReportTitle: "レポートを削除しますか？",
+    deleteReportMsg: "このレポートを削除してもよろしいですか？この操作は取り消せません。",
+    deleteReportSuccess: "レポートが削除されました。",
+    reportCreatedTitle: "レポートが作成されました！",
+    reportCreatedMsg: "レポートがキャンパス掲示板に公開されました。",
+    claimSubmittedTitle: "返還請求が送信されました！",
+    claimSubmittedMsg: "所有権の確認請求が送信されました。",
+    itemReturnedTitle: "🎉 返還完了！",
+    itemReturnedMsg: "アイテムは正常に返還済みとしてマークされました。",
+    profileUpdatedTitle: "プロフィールが更新されました！",
+    profileUpdatedMsg: "プロフィール情報が正常に保存されました。",
+    signInFailed: "サインイン失敗",
+    connectionError: "サーバーに接続できません。"
   }
 };
 
@@ -137,7 +197,7 @@ export const categoryTranslations = {
 export const locationTranslations = {
   "RUPP Campus 1 — Building A (Humanities)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ A", ja: "RUPP キャンパス1 — A棟 (人文学)" },
   "RUPP Campus 1 — Building B (Science & IT)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ B", ja: "RUPP キャンパス1 — B棟 (理学・IT)" },
-  "RUPP Campus 1 — IFL (Institute of Foreign Languages)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — IFL", ja: "RUPP キャンパス1 — IFL (外国語研究所)" },
+  "RUPP Campus 1 — IFL (Institute of Foreign Languages)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — IFL", ja: "RUPP キャンパス1 — IFL (外国语研究所)" },
   "RUPP Campus 1 — Central Library (បណ្ណាល័យ)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — បណ្ណាល័យកណ្តាល", ja: "RUPP キャンパス1 — 中央図書館" },
   "RUPP Campus 1 — Sports Field & Canteen": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — តារាងកីឡា & អាហារដ្ឋាន", ja: "RUPP キャンパス1 — 運動場・学食" },
   "RUPP Campus 2 — Faculty of Engineering (FE)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ២ — មហាវិទ្យាល័យវិស្វកម្ម", ja: "RUPP キャンパス2 — 工学部 (FE)" },
@@ -172,4 +232,3 @@ export function getLocationName(name, lang = 'en') {
   }
   return name;
 }
-

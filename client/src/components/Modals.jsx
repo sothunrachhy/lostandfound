@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search, MapPin, Calendar, Tag, MessageCircle, LogOut, AlertCircle } from 'lucide-react';
-import { getCategoryName, getLocationName } from '../translations';
+import { translations, getCategoryName, getLocationName } from '../translations';
 
 const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
   const reader = new FileReader();
@@ -252,10 +252,13 @@ export function ReportModal({ isOpen, onClose, mode, categories, locations, curr
   );
 }
 
-export function ClaimModal({ isOpen, onClose, foundItem, lostItem, currentUser, onSubmit }) {
+export function ClaimModal({ isOpen, onClose, foundItem, lostItem, currentUser, onSubmit, lang = 'en' }) {
   const [proof, setProof] = useState('');
   const [contact, setContact] = useState(currentUser ? `${currentUser.Email} | ${currentUser.Phone}` : '');
   if (!isOpen || !foundItem) return null;
+
+  const t = translations[lang] || translations.en;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({ FoundID: foundItem.FoundID, LostID: lostItem?.LostID || null, OwnerID: currentUser.UserID, FinderID: foundItem.UserID, Proof: proof, ContactInfo: contact });
@@ -266,24 +269,24 @@ export function ClaimModal({ isOpen, onClose, foundItem, lostItem, currentUser, 
       <div className="modal-box w-full max-w-lg p-7 space-y-5 relative">
         <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer"><X className="w-4 h-4" /></button>
         <div>
-          <span className="text-[10px] font-black bg-teal-100 text-teal-700 px-2.5 py-1 rounded-full uppercase">Ownership Verification</span>
-          <h2 className="text-xl font-black text-slate-800 mt-2">Claim: {foundItem.ItemName}</h2>
+          <span className="text-[10px] font-black bg-teal-100 text-teal-700 px-2.5 py-1 rounded-full uppercase">{t.claimItem}</span>
+          <h2 className="text-xl font-black text-slate-800 mt-2">{t.claimItem}: {foundItem.ItemName}</h2>
           <p className="text-xs text-slate-400 mt-0.5">Provide proof so campus safety can verify and approve the release.</p>
         </div>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs space-y-0.5">
           <p className="font-bold text-slate-700">{foundItem.ItemName} · {foundItem.Brand || 'Unbranded'}</p>
-          <p className="text-slate-400">Found at: {foundItem.LocationName}</p>
+          <p className="text-slate-400">Found at: {getLocationName(foundItem.LocationName, lang)}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3.5">
-          <div><label className="block text-xs font-bold text-slate-600 mb-1">Proof of Ownership *</label>
+          <div><label className="block text-xs font-bold text-slate-600 mb-1">{t.proofOfOwnership} *</label>
             <textarea required rows={4} className="input-field font-mono resize-none" placeholder="Serial number, passcode, invoice number, unique engraving..." value={proof} onChange={e => setProof(e.target.value)} />
           </div>
-          <div><label className="block text-xs font-bold text-slate-600 mb-1">Contact Details</label>
+          <div><label className="block text-xs font-bold text-slate-600 mb-1">{t.contactDetails}</label>
             <input className="input-field" value={contact} onChange={e => setContact(e.target.value)} required />
           </div>
           <div className="flex justify-end gap-2 pt-1 border-t border-slate-100">
-            <button type="button" onClick={onClose} className="btn-ghost text-xs px-4 py-2 rounded-xl">Cancel</button>
-            <button type="submit" className="btn-primary text-xs px-5 py-2 rounded-xl"><ShieldCheck className="w-3.5 h-3.5" /> Submit Claim</button>
+            <button type="button" onClick={onClose} className="btn-ghost text-xs px-4 py-2 rounded-xl">{t.cancel}</button>
+            <button type="submit" className="btn-primary text-xs px-5 py-2 rounded-xl"><ShieldCheck className="w-3.5 h-3.5" /> {t.submitClaim}</button>
           </div>
         </form>
       </div>
@@ -660,9 +663,10 @@ export function NotificationModal({ isOpen, onClose, title, message, type = 'suc
 
 export const SuccessModal = NotificationModal;
 
-export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat, onOpenClaim, onApproveDirect, onDeleteReport }) {
+export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat, onOpenClaim, onApproveDirect, onDeleteReport, lang = 'en' }) {
   if (!isOpen || !item) return null;
 
+  const t = translations[lang] || translations.en;
   const isFound = 'FoundID' in item;
   const isOwnerOrFinder = currentUser && currentUser.UserID === item.UserID;
 
@@ -699,11 +703,11 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
             <span className={`text-[11px] sm:text-xs font-black uppercase px-2.5 py-1 rounded-xl shadow-md backdrop-blur-sm ${
               isFound ? 'bg-teal-600/90 text-white' : 'bg-rose-600/90 text-white'
             }`}>
-              {isFound ? 'Found Item' : 'Lost Item'}
+              {isFound ? t.statusFound : t.statusLost}
             </span>
             {item.Status === 'Claimed' && (
               <span className="text-[11px] sm:text-xs font-black uppercase px-2.5 py-1 rounded-xl shadow-md bg-amber-600/90 text-white backdrop-blur-sm">
-                Claimed
+                {t.statusClaimed}
               </span>
             )}
           </div>
@@ -718,15 +722,15 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-100 text-xs">
             <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Campus Location</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.location}</span>
               <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                 <MapPin className="w-4 h-4 text-teal-600 shrink-0" />
-                {item.LocationName || 'Campus Building'}
+                {getLocationName(item.LocationName, lang) || 'Campus Building'}
               </p>
             </div>
 
             <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date & Time {isFound ? 'Found' : 'Lost'}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.date} ({isFound ? t.statusFound : t.statusLost})</span>
               <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                 <Calendar className="w-4 h-4 text-teal-600 shrink-0" />
                 {isFound ? item.DateFound : item.DateLost}
@@ -740,7 +744,7 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
 
             {item.Brand && (
               <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Brand / Make</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.brand}</span>
                 <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                   <Tag className="w-4 h-4 text-teal-600 shrink-0" />
                   {item.Brand}
@@ -750,7 +754,7 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
 
             {item.Color && (
               <div className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.color}</span>
                 <p className="font-bold text-slate-800 flex items-center gap-1.5 break-words">
                   <Tag className="w-4 h-4 text-teal-600 shrink-0" />
                   {item.Color}
@@ -772,7 +776,7 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
               className="w-full sm:w-auto justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-3 rounded-xl sm:rounded-2xl cursor-pointer flex items-center gap-1.5 transition-colors"
             >
               <MessageCircle className="w-4 h-4 text-teal-600" />
-              Chat with Reporter
+              {t.chat}
             </button>
 
             {isFound && item.Status !== 'Claimed' && (
@@ -789,7 +793,7 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
                   onClick={() => { onClose(); onOpenClaim(item); }}
                   className="w-full sm:w-auto justify-center btn-primary text-xs px-5 py-3 rounded-xl sm:rounded-2xl cursor-pointer font-bold shadow-md active:scale-95"
                 >
-                  Claim This Item
+                  {t.claimItem}
                 </button>
               )
             )}
@@ -800,12 +804,16 @@ export function ItemDetailModal({ isOpen, onClose, item, currentUser, onOpenChat
   );
 }
 
-export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete', variant }) {
+export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText, lang = 'en', variant }) {
   if (!isOpen) return null;
 
-  const textLower = (confirmText + ' ' + (title || '')).toLowerCase();
-  const isDelete = variant === 'danger' || textLower.includes('delete') || textLower.includes('remove');
-  const isLogout = variant === 'warning' || textLower.includes('sign out') || textLower.includes('logout');
+  const t = translations[lang] || translations.en;
+  const resolvedConfirmText = confirmText || t.delete || 'Delete';
+  const resolvedCancelText = cancelText || t.cancel || 'Cancel';
+
+  const textLower = (resolvedConfirmText + ' ' + (title || '') + ' ' + (message || '')).toLowerCase();
+  const isDelete = variant === 'danger' || textLower.includes('delete') || textLower.includes('remove') || textLower.includes('លុប') || textLower.includes('削除');
+  const isLogout = variant === 'warning' || textLower.includes('sign out') || textLower.includes('logout') || textLower.includes('ចាកចេញ') || textLower.includes('サインアウト');
 
   // Dynamic button color styling
   const btnColorClass = isDelete
@@ -841,7 +849,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confi
             onClick={onClose}
             className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-2xl cursor-pointer transition-all active:scale-95"
           >
-            Cancel
+            {resolvedCancelText}
           </button>
           <button
             type="button"
@@ -851,7 +859,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confi
             }}
             className={`flex-1 font-bold text-xs py-3 rounded-2xl cursor-pointer transition-all active:scale-95 ${btnColorClass}`}
           >
-            {confirmText}
+            {resolvedConfirmText}
           </button>
         </div>
       </div>
