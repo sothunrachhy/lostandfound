@@ -12,15 +12,12 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Vercel Serverless Function route prefix normalizer
-app.use((req, res, next) => {
-  if (!req.url.startsWith('/api')) {
-    req.url = '/api' + (req.url.startsWith('/') ? '' : '/') + req.url;
-  }
-  next();
-});
+const router = express.Router();
 
-app.get('/', (req, res) => {
+// ── Helper ────────────────────────────────────────────────────────
+const q = (text, params) => pool.query(text, params);
+
+router.get('/', (req, res) => {
   res.json({
     status: 'online',
     message: 'LF System API is running serverlessly on Vercel!',
@@ -37,13 +34,10 @@ app.get('/', (req, res) => {
   });
 });
 
-// ── Helper ────────────────────────────────────────────────────────
-const q = (text, params) => pool.query(text, params);
-
 // ══════════════════════════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════════════════════════
-app.post('/api/auth/login', async (req, res) => {
+router.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const { rows } = await q(
@@ -63,7 +57,7 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post('/api/auth/register', async (req, res) => {
+router.post('/auth/register', async (req, res) => {
   const { name, email, password, phone, studentID, roleID, profileImage } = req.body;
   if (!name || !email || !password)
     return res.status(400).json({ success: false, message: 'Name, email and password required' });
@@ -91,7 +85,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-app.put('/api/users/profile', async (req, res) => {
+router.put('/users/profile', async (req, res) => {
   const UserID = req.body.UserID || req.body.userId || req.body.user_id;
   const Name = req.body.Name || req.body.name;
   const Phone = req.body.Phone || req.body.phone || '';
@@ -119,7 +113,7 @@ app.put('/api/users/profile', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.get('/api/users', async (_req, res) => {
+router.get('/users', async (_req, res) => {
   try {
     const { rows } = await q(
       `SELECT u.user_id, u.student_id, u.name, u.email, u.phone, u.profile_image, u.last_active,
@@ -133,7 +127,7 @@ app.get('/api/users', async (_req, res) => {
   }
 });
 
-app.post('/api/users/heartbeat', async (req, res) => {
+router.post('/users/heartbeat', async (req, res) => {
   const userId = req.body.userId || req.body.UserID || req.body.user_id;
   if (!userId) return res.json({ success: false, message: 'No userId provided' });
   try {
@@ -144,7 +138,7 @@ app.post('/api/users/heartbeat', async (req, res) => {
   }
 });
 
-app.delete('/api/users/:id', async (req, res) => {
+router.delete('/users/:id', async (req, res) => {
   const userId = req.params.id;
   try {
     await q('DELETE FROM notifications WHERE user_id=$1', [userId]);
@@ -165,12 +159,12 @@ app.delete('/api/users/:id', async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // CATEGORIES & LOCATIONS
 // ══════════════════════════════════════════════════════════════════
-app.get('/api/categories', async (_req, res) => {
+router.get('/categories', async (_req, res) => {
   const { rows } = await q('SELECT category_id AS "CategoryID", category_name AS "CategoryName" FROM categories ORDER BY category_id');
   res.json(rows);
 });
 
-app.post('/api/categories', async (req, res) => {
+router.post('/categories', async (req, res) => {
   const { CategoryName } = req.body;
   if (!CategoryName) return res.status(400).json({ message: 'Category name required' });
   const { rows } = await q(
@@ -180,7 +174,7 @@ app.post('/api/categories', async (req, res) => {
   res.json({ success: true, category: rows[0] });
 });
 
-app.put('/api/categories/:id', async (req, res) => {
+router.put('/categories/:id', async (req, res) => {
   const { CategoryName } = req.body;
   if (!CategoryName) return res.status(400).json({ message: 'Category name required' });
   try {
@@ -189,19 +183,19 @@ app.put('/api/categories/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete('/api/categories/:id', async (req, res) => {
+router.delete('/categories/:id', async (req, res) => {
   try {
     await q('DELETE FROM categories WHERE category_id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ message: 'Cannot delete category that is currently assigned to reported items' }); }
 });
 
-app.get('/api/locations', async (_req, res) => {
+router.get('/locations', async (_req, res) => {
   const { rows } = await q('SELECT location_id AS "LocationID", location_name AS "LocationName" FROM locations ORDER BY location_id');
   res.json(rows);
 });
 
-app.post('/api/locations', async (req, res) => {
+router.post('/locations', async (req, res) => {
   const { LocationName } = req.body;
   if (!LocationName) return res.status(400).json({ message: 'Location name required' });
   const { rows } = await q(
@@ -211,7 +205,7 @@ app.post('/api/locations', async (req, res) => {
   res.json({ success: true, location: rows[0] });
 });
 
-app.put('/api/locations/:id', async (req, res) => {
+router.put('/locations/:id', async (req, res) => {
   const { LocationName } = req.body;
   if (!LocationName) return res.status(400).json({ message: 'Location name required' });
   try {
@@ -220,7 +214,7 @@ app.put('/api/locations/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete('/api/locations/:id', async (req, res) => {
+router.delete('/locations/:id', async (req, res) => {
   try {
     await q('DELETE FROM locations WHERE location_id = $1', [req.params.id]);
     res.json({ success: true });
@@ -248,7 +242,7 @@ const LOST_SELECT = `
   JOIN users      u   ON u.user_id       = l.user_id
 `;
 
-app.get('/api/lost-items', async (req, res) => {
+router.get('/lost-items', async (req, res) => {
   try {
     const { search, categoryId, locationId, status } = req.query;
     let sql    = LOST_SELECT + ' WHERE 1=1';
@@ -265,7 +259,7 @@ app.get('/api/lost-items', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post('/api/lost-items', async (req, res) => {
+router.post('/lost-items', async (req, res) => {
   const { UserID, CategoryID, LocationID, ItemName, Brand, Color, Description, DateLost, Image } = req.body;
   if (!UserID || !ItemName || !CategoryID || !LocationID)
     return res.status(400).json({ success: false, message: 'Required fields missing' });
@@ -286,7 +280,7 @@ app.post('/api/lost-items', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete('/api/lost-items/:id', async (req, res) => {
+router.delete('/lost-items/:id', async (req, res) => {
   await q('DELETE FROM lost_items WHERE lost_id = $1', [req.params.id]);
   res.json({ success: true });
 });
@@ -312,7 +306,7 @@ const FOUND_SELECT = `
   JOIN users      u   ON u.user_id       = f.user_id
 `;
 
-app.get('/api/found-items', async (req, res) => {
+router.get('/found-items', async (req, res) => {
   try {
     const { search, categoryId, locationId, status } = req.query;
     let sql    = FOUND_SELECT + ' WHERE 1=1';
@@ -329,7 +323,7 @@ app.get('/api/found-items', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post('/api/found-items', async (req, res) => {
+router.post('/found-items', async (req, res) => {
   const { UserID, CategoryID, LocationID, ItemName, Brand, Color, Description, DateFound, Image } = req.body;
   if (!UserID || !ItemName || !CategoryID || !LocationID)
     return res.status(400).json({ success: false, message: 'Required fields missing' });
@@ -348,12 +342,12 @@ app.post('/api/found-items', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete('/api/found-items/:id', async (req, res) => {
+router.delete('/found-items/:id', async (req, res) => {
   await q(`DELETE FROM found_items WHERE found_id=$1`, [req.params.id]);
   res.json({ success: true, message: 'Item deleted' });
 });
 
-app.put('/api/found-items/:id/status', async (req, res) => {
+router.put('/found-items/:id/status', async (req, res) => {
   const { status } = req.body;
   try {
     await q(`UPDATE found_items SET status=$1 WHERE found_id=$2`, [status || 'Claimed', req.params.id]);
@@ -366,7 +360,7 @@ app.put('/api/found-items/:id/status', async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // MATCHING ENGINE
 // ══════════════════════════════════════════════════════════════════
-app.get('/api/matches', async (_req, res) => {
+router.get('/matches', async (_req, res) => {
   try {
     const [lostRes, foundRes] = await Promise.all([
       q(LOST_SELECT  + " WHERE l.status = 'Lost' ORDER BY l.created_at DESC"),
@@ -380,7 +374,7 @@ app.get('/api/matches', async (_req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // CLAIMS
 // ══════════════════════════════════════════════════════════════════
-app.get('/api/claims', async (_req, res) => {
+router.get('/claims', async (_req, res) => {
   try {
     const { rows } = await q(`
       SELECT cl.claim_id AS "ClaimID", cl.lost_id AS "LostID", cl.found_id AS "FoundID",
@@ -404,7 +398,7 @@ app.get('/api/claims', async (_req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post('/api/claims', async (req, res) => {
+router.post('/claims', async (req, res) => {
   const { LostID, FoundID, OwnerID, FinderID, Proof, ContactInfo } = req.body;
   if (!FoundID || !OwnerID || !Proof)
     return res.status(400).json({ success: false, message: 'FoundID, OwnerID, and Proof are required' });
@@ -428,7 +422,7 @@ app.post('/api/claims', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.put('/api/claims/:id/status', async (req, res) => {
+router.put('/claims/:id/status', async (req, res) => {
   const { status, adminNotes } = req.body;
   const claimId = req.params.id;
   try {
@@ -455,7 +449,7 @@ app.put('/api/claims/:id/status', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete('/api/claims/:id', async (req, res) => {
+router.delete('/claims/:id', async (req, res) => {
   const claimId = req.params.id;
   try {
     const { rows } = await q(`DELETE FROM claims WHERE claim_id=$1 RETURNING claim_id`, [claimId]);
@@ -466,7 +460,7 @@ app.delete('/api/claims/:id', async (req, res) => {
   }
 });
 
-app.post(['/api/claims/approve-direct', '/claims/approve-direct'], async (req, res) => {
+router.post(['/claims/approve-direct', '/api/claims/approve-direct'], async (req, res) => {
   const { foundId, finderId, ownerId } = req.body;
   try {
     if (foundId) {
@@ -488,7 +482,7 @@ app.post(['/api/claims/approve-direct', '/claims/approve-direct'], async (req, r
 // ══════════════════════════════════════════════════════════════════
 // NOTIFICATIONS
 // ══════════════════════════════════════════════════════════════════
-app.get('/api/notifications', async (req, res) => {
+router.get('/notifications', async (req, res) => {
   const { userId } = req.query;
   const sql = userId
     ? `SELECT notification_id AS "NotificationID", user_id AS "UserID", message AS "Message",
@@ -501,7 +495,7 @@ app.get('/api/notifications', async (req, res) => {
   res.json(rows);
 });
 
-app.put('/api/notifications/:id/read', async (req, res) => {
+router.put('/notifications/:id/read', async (req, res) => {
   await q(`UPDATE notifications SET status='Read' WHERE notification_id=$1`, [req.params.id]);
   res.json({ success: true });
 });
@@ -509,7 +503,7 @@ app.put('/api/notifications/:id/read', async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // MESSAGES
 // ══════════════════════════════════════════════════════════════════
-app.get('/api/messages', async (req, res) => {
+router.get('/messages', async (req, res) => {
   const { userId1, userId2 } = req.query;
   if (userId1 && userId2) {
     const { rows } = await q(
@@ -527,7 +521,7 @@ app.get('/api/messages', async (req, res) => {
   res.json(rows);
 });
 
-app.post('/api/messages', async (req, res) => {
+router.post('/messages', async (req, res) => {
   const { SenderID, ReceiverID, ItemID, MessageText } = req.body;
   if (!SenderID || !ReceiverID || !MessageText)
     return res.status(400).json({ message: 'Sender, receiver, and message text required' });
@@ -561,7 +555,7 @@ app.post('/api/messages', async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // ADMIN STATS
 // ══════════════════════════════════════════════════════════════════
-app.get('/api/admin/stats', async (_req, res) => {
+router.get('/admin/stats', async (_req, res) => {
   try {
     const [lostRes, foundRes, claimsRes, usersRes] = await Promise.all([
       q(`SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status='Claimed') AS claimed FROM lost_items`),
@@ -584,6 +578,10 @@ app.get('/api/admin/stats', async (_req, res) => {
     res.json({ totalLost, totalFound, claimedLost, claimedFound, pendingClaims: pending, approvedClaims: approved, totalUsers, recoveryRate });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
+
+// Mount router under BOTH '/api' AND '/'
+app.use('/api', router);
+app.use('/', router);
 
 // ══════════════════════════════════════════════════════════════════
 // AUTO-MATCH NOTIFICATIONS (internal helper)
