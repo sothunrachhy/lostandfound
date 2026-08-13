@@ -435,11 +435,22 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
   const [showContactList, setShowContactList] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
+  const scrollContainerRef = useRef(null);
+  const userScrolledUpRef = useRef(false);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    const isBottom = scrollHeight - scrollTop - clientHeight < 120;
+    userScrolledUpRef.current = !isBottom;
+  };
+
+  const scrollToBottom = (force = false) => {
+    if (force || !userScrolledUpRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
@@ -453,7 +464,12 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
   }, [isOpen, recipient]);
 
   useEffect(() => {
-    scrollToBottom();
+    userScrolledUpRef.current = false;
+    scrollToBottom(true);
+  }, [recipient?.UserID]);
+
+  useEffect(() => {
+    scrollToBottom(false);
   }, [messages]);
 
   if (!isOpen) return null;
@@ -463,6 +479,8 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
     if (!text.trim() || !recipient) return;
     onSend({ SenderID: currentUser.UserID, ReceiverID: recipient.UserID, MessageText: text });
     setText('');
+    userScrolledUpRef.current = false;
+    setTimeout(() => scrollToBottom(true), 50);
   };
 
   const handlePhotoSelect = (e) => {
@@ -481,12 +499,16 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
     if (!previewImage || !recipient) return;
     onSend({ SenderID: currentUser.UserID, ReceiverID: recipient.UserID, MessageText: `[IMAGE]${previewImage}` });
     setPreviewImage('');
+    userScrolledUpRef.current = false;
+    setTimeout(() => scrollToBottom(true), 50);
   };
 
   const handleSendLocation = ({ locationName, note }) => {
     if (!recipient) return;
     const locPayload = note ? `${locationName}|${note}` : locationName;
     onSend({ SenderID: currentUser.UserID, ReceiverID: recipient.UserID, MessageText: `[LOCATION]${locPayload}` });
+    userScrolledUpRef.current = false;
+    setTimeout(() => scrollToBottom(true), 50);
   };
 
   const filteredUsers = (allUsers || []).filter(u =>
@@ -597,7 +619,7 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
         )}
 
         {/* Message Thread */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60">
+        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60">
           {!recipient ? (
             <div className="text-center py-20 space-y-3">
               <div className="w-12 h-12 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center mx-auto shadow-inner">

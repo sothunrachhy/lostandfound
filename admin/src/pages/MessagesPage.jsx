@@ -181,8 +181,23 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
   const [profileModalUser, setProfileModalUser] = useState(null);
   const [showMapModal, setShowMapModal] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
+  const scrollContainerRef = useRef(null);
+  const userScrolledUpRef = useRef(false);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
+
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    const isBottom = scrollHeight - scrollTop - clientHeight < 120;
+    userScrolledUpRef.current = !isBottom;
+  };
+
+  const scrollToBottom = (force = false) => {
+    if (force || !userScrolledUpRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const studentUsers = (users || []).filter(u => u.UserID !== currentAdmin.UserID);
 
@@ -216,7 +231,12 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
   }, [selectedUser]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    userScrolledUpRef.current = false;
+    scrollToBottom(true);
+  }, [selectedUser?.UserID]);
+
+  useEffect(() => {
+    scrollToBottom(false);
   }, [messages]);
 
   const sendMessagePayload = async (msgText) => {
@@ -234,6 +254,8 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
       const data = await res.json();
       if (data.success) {
         fetchThread();
+        userScrolledUpRef.current = false;
+        setTimeout(() => scrollToBottom(true), 50);
       }
     } catch (e) {
       console.error(e);
@@ -378,7 +400,7 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
             </div>
 
             {/* Chat Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60">
+            <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60">
               {messages.length === 0 ? (
                 <div className="text-center py-20 space-y-1">
                   <p className="text-xs font-semibold text-slate-500">No message history with {selectedUser.Name} yet.</p>
