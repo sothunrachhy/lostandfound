@@ -18,7 +18,7 @@ const q = (text, params) => pool.query(text, params);
 app.get(['/api', '/'], (req, res) => {
   res.json({
     status: 'online',
-    message: 'LF System API TEST-VERSION-999',
+    message: 'LF System API is running serverlessly on Vercel!',
     database: 'Neon PostgreSQL',
     endpoints: [
       '/api/lost-items',
@@ -133,6 +133,22 @@ app.post(['/api/users/heartbeat', '/users/heartbeat'], async (req, res) => {
     res.json({ success: true });
   } catch (e) {
     res.json({ success: false, message: e.message });
+  }
+});
+
+app.put(['/api/users/:id/role', '/users/:id/role'], async (req, res) => {
+  const userId = req.params.id;
+  const roleId = parseInt(req.body.roleID || req.body.role_id) === 2 ? 2 : 1;
+  try {
+    const { rows } = await q(
+      'UPDATE users SET role_id = $1 WHERE user_id = $2 RETURNING user_id, name, role_id',
+      [roleId, userId]
+    );
+    if (rows.length === 0) return res.status(404).json({ success: false, message: 'User account not found' });
+    const roleName = roleId === 2 ? 'Admin' : 'Student';
+    res.json({ success: true, message: `User role updated to ${roleName}` });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 

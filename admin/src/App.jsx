@@ -116,6 +116,47 @@ export default function App() {
       notify('Error', 'Failed to delete claim.', 'error');
     }
   };
+  const handleCreateAdmin = async (adminData) => {
+    try {
+      const res = await fetch(`${API}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...adminData, roleID: 2 })
+      });
+      const data = await res.json();
+      if (data.success) {
+        notify('Admin Created!', `New administrator account "${adminData.name}" (${adminData.email}) was created successfully.`, 'success');
+        fetchData();
+        return true;
+      } else {
+        notify('Creation Failed', data.message || 'Cannot create admin account', 'error');
+        return false;
+      }
+    } catch {
+      notify('Error', 'Failed to connect to server.', 'error');
+      return false;
+    }
+  };
+
+  const handleUpdateUserRole = async (userId, newRoleID) => {
+    try {
+      const res = await fetch(`${API}/api/users/${userId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roleID: newRoleID })
+      });
+      const data = await res.json();
+      if (data.success) {
+        notify('Role Updated', data.message || 'User role updated successfully.', 'success');
+        fetchData();
+      } else {
+        notify('Update Failed', data.message || 'Cannot update user role', 'error');
+      }
+    } catch {
+      notify('Error', 'Failed to update user role.', 'error');
+    }
+  };
+
   const handleDeleteUser = async (userId) => {
     try {
       const res = await fetch(`${API}/api/users/${userId}`, { method: 'DELETE' });
@@ -203,7 +244,7 @@ export default function App() {
           {activePage === 'claims'    && <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} onDeleteClaim={handleDeleteClaim} />}
           {activePage === 'reports'   && <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} />}
           {activePage === 'messages'  && <MessagesPage currentAdmin={currentAdmin} users={users} API={API} onRefresh={fetchData} />}
-          {activePage === 'users'     && <UsersPage users={users} onDeleteUser={handleDeleteUser} />}
+          {activePage === 'users'     && <UsersPage users={users} onDeleteUser={handleDeleteUser} onCreateAdmin={handleCreateAdmin} onUpdateUserRole={handleUpdateUserRole} />}
           {activePage === 'settings'  && (
             <SettingsPage
               categories={categories}
