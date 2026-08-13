@@ -63,7 +63,13 @@ export default function Navbar({
               title="Change Language"
             >
               <img
-                src={lang === 'km' ? 'https://flagcdn.com/w40/kh.png' : lang === 'ja' ? 'https://flagcdn.com/w40/jp.png' : 'https://flagcdn.com/w40/us.png'}
+                src={
+                  lang === 'km' ? 'https://flagcdn.com/w40/kh.png' :
+                  lang === 'ja' ? 'https://flagcdn.com/w40/jp.png' :
+                  lang === 'ko' ? 'https://flagcdn.com/w40/kr.png' :
+                  lang === 'zh' ? 'https://flagcdn.com/w40/cn.png' :
+                  'https://flagcdn.com/w40/us.png'
+                }
                 alt=""
                 className="w-4.5 h-3 sm:w-5 sm:h-3.5 object-cover rounded-sm shadow-xs shrink-0"
               />
@@ -72,7 +78,7 @@ export default function Navbar({
             </button>
 
             {showLangMenu && (
-              <div className="absolute right-0 mt-1 w-38 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50 fade-up space-y-0.5">
+              <div className="absolute right-0 mt-1 w-40 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50 fade-up space-y-0.5">
                 <button
                   onClick={() => { onLangChange('en'); setShowLangMenu(false); }}
                   className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 font-semibold hover:bg-slate-50 transition-colors cursor-pointer ${
@@ -99,6 +105,24 @@ export default function Navbar({
                 >
                   <img src="https://flagcdn.com/w40/jp.png" alt="" className="w-5 h-3.5 object-cover rounded-sm shadow-xs shrink-0" />
                   日本語 (Japanese)
+                </button>
+                <button
+                  onClick={() => { onLangChange('ko'); setShowLangMenu(false); }}
+                  className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 font-semibold hover:bg-slate-50 transition-colors cursor-pointer ${
+                    lang === 'ko' ? 'text-teal-700 font-bold bg-teal-50/60' : 'text-slate-700'
+                  }`}
+                >
+                  <img src="https://flagcdn.com/w40/kr.png" alt="" className="w-5 h-3.5 object-cover rounded-sm shadow-xs shrink-0" />
+                  한국어 (Korean)
+                </button>
+                <button
+                  onClick={() => { onLangChange('zh'); setShowLangMenu(false); }}
+                  className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 font-semibold hover:bg-slate-50 transition-colors cursor-pointer ${
+                    lang === 'zh' ? 'text-teal-700 font-bold bg-teal-50/60' : 'text-slate-700'
+                  }`}
+                >
+                  <img src="https://flagcdn.com/w40/cn.png" alt="" className="w-5 h-3.5 object-cover rounded-sm shadow-xs shrink-0" />
+                  中文 (Chinese)
                 </button>
               </div>
             )}

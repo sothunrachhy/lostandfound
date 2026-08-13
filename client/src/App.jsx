@@ -16,6 +16,8 @@ export default function App() {
     document.documentElement.setAttribute('lang', lang);
     document.body.classList.toggle('lang-km', lang === 'km');
     document.body.classList.toggle('lang-ja', lang === 'ja');
+    document.body.classList.toggle('lang-ko', lang === 'ko');
+    document.body.classList.toggle('lang-zh', lang === 'zh');
   }, [lang]);
 
   // Session — persisted in localStorage
