@@ -7,21 +7,18 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
 
   const textLower = (confirmText + ' ' + (title || '')).toLowerCase();
   const isDelete = variant === 'danger' || textLower.includes('delete') || textLower.includes('remove');
-  const isLogout = variant === 'warning' || textLower.includes('sign out') || textLower.includes('logout');
 
   // Dynamic button color styling
   const btnColorClass = isDelete
-    ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/25'
-    : isLogout
-    ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/25'
-    : 'bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-600/25';
+    ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm'
+    : 'bg-teal-700 hover:bg-teal-800 text-white shadow-sm';
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl text-center space-y-4 relative animate-in zoom-in-95 duration-200 my-auto">
+    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 max-w-sm w-full shadow-2xl text-center space-y-4 relative animate-in zoom-in-95 duration-200 my-auto">
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -41,7 +38,7 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-2xl cursor-pointer transition-all active:scale-95"
+            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95"
           >
             Cancel
           </button>
@@ -51,7 +48,7 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
               onConfirm();
               onClose();
             }}
-            className={`flex-1 font-bold text-xs py-3 rounded-2xl cursor-pointer transition-all active:scale-95 ${btnColorClass}`}
+            className={`flex-1 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95 ${btnColorClass}`}
           >
             {confirmText}
           </button>
