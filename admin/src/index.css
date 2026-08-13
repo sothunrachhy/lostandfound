@@ -25,13 +25,18 @@
   }
 }
 
-/* ── Sidebar layout ──────────────────────────── */
-.admin-shell { display: flex; min-height: 100vh; background: #f8fafc; }
+/* ── Sidebar & Layout with Khmer Royal Pattern Background ────── */
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fdfdfb;
+}
 
 .admin-sidebar {
   width: 240px;
   min-height: 100vh;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
@@ -47,6 +52,11 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  background-color: #fafaf7;
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(248, 250, 252, 0.92)), url('/khmer-pattern.png');
+  background-repeat: repeat;
+  background-size: 200px auto;
+  background-attachment: fixed;
 }
 
 @media (max-width: 768px) {
