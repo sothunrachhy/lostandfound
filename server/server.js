@@ -18,7 +18,7 @@ const q = (text, params) => pool.query(text, params);
 app.get(['/api', '/'], (req, res) => {
   res.json({
     status: 'online',
-    message: 'LF System API is running serverlessly on Vercel!',
+    message: 'LF System API TEST-VERSION-999',
     database: 'Neon PostgreSQL',
     endpoints: [
       '/api/lost-items',
