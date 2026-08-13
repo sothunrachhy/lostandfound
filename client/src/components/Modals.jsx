@@ -514,15 +514,6 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-sm font-extrabold text-slate-900 truncate leading-snug">{recipient.Name}</h4>
-                  <div className="mt-0.5">
-                    <span className={`inline-flex items-center text-[10px] font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs ${
-                      recipient.RoleName === 'Admin' || recipient.RoleID === 2
-                        ? 'bg-amber-50/90 text-amber-700 border-amber-300'
-                        : 'bg-teal-50/90 text-teal-700 border-teal-300'
-                    }`}>
-                      {recipient.RoleName || (recipient.RoleID === 2 ? 'Admin' : 'User')}
-                    </span>
-                  </div>
                 </div>
               </div>
             ) : (
