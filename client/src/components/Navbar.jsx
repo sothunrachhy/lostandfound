@@ -63,7 +63,7 @@ export default function Navbar({
               title="Change Language"
             >
               <img
-                src={lang === 'km' ? 'https://flagcdn.com/w40/kh.png' : 'https://flagcdn.com/w40/us.png'}
+                src={lang === 'km' ? 'https://flagcdn.com/w40/kh.png' : lang === 'ja' ? 'https://flagcdn.com/w40/jp.png' : 'https://flagcdn.com/w40/us.png'}
                 alt=""
                 className="w-4.5 h-3 sm:w-5 sm:h-3.5 object-cover rounded-sm shadow-xs shrink-0"
               />
@@ -90,6 +90,15 @@ export default function Navbar({
                 >
                   <img src="https://flagcdn.com/w40/kh.png" alt="" className="w-5 h-3.5 object-cover rounded-sm shadow-xs shrink-0" />
                   ភាសាខ្មែរ (Khmer)
+                </button>
+                <button
+                  onClick={() => { onLangChange('ja'); setShowLangMenu(false); }}
+                  className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 font-semibold hover:bg-slate-50 transition-colors cursor-pointer ${
+                    lang === 'ja' ? 'text-teal-700 font-bold bg-teal-50/60' : 'text-slate-700'
+                  }`}
+                >
+                  <img src="https://flagcdn.com/w40/jp.png" alt="" className="w-5 h-3.5 object-cover rounded-sm shadow-xs shrink-0" />
+                  日本語 (Japanese)
                 </button>
               </div>
             )}

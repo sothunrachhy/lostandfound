@@ -80,54 +80,95 @@ export const translations = {
     submitClaim: "ផ្ញើការទាមទារ",
     typeAMessage: "សរសេរសារ...",
     noMessagesYet: "មិនទាន់មានសារនៅឡើយទេ។",
+  },
+  ja: {
+    // Navbar & Buttons
+    reportLost: "紛失物を届ける",
+    reportFound: "拾得物を届ける",
+    searchPlaceholder: "名前、ブランド、色で検索...",
+    allCategories: "すべてのカテゴリ",
+    allLocations: "すべての場所",
+    lostItems: "落とし物",
+    foundItems: "拾い物",
+    all: "すべて",
+    statusLost: "紛失",
+    statusFound: "発見",
+    statusClaimed: "受取済み",
+    claimItem: "受け取る（返還請求）",
+    iFoundThis: "これを見つけました",
+    chat: "チャット",
+    notifications: "通知",
+    profileSettings: "プロフィール編集",
+    adminPortal: "管理者ポータル",
+    noItemsFound: "該当するアイテムが見つかりません",
+    delete: "削除",
+    viewDetails: "詳細を見る",
+    date: "日付",
+    location: "場所",
+    category: "カテゴリ",
+    brand: "ブランド",
+    color: "色",
+    description: "説明",
+    saveChanges: "変更を保存",
+    cancel: "キャンセル",
+
+    // Modals
+    whatDidYouLose: "何を紛失しましたか？",
+    whatDidYouFind: "何を拾いましたか？",
+    itemName: "品名",
+    proofOfOwnership: "所有権の証明",
+    contactDetails: "連絡先",
+    submitClaim: "申請を送信",
+    typeAMessage: "メッセージを入力...",
+    noMessagesYet: "まだメッセージはありません。",
   }
 };
 
 export const categoryTranslations = {
-  "Electronics & Gadgets": "ឧបករណ៍អេឡិចត្រូនិក",
-  "IDs & Cards": "កាតសម្គាល់ខ្លួន & កាតផ្សេងៗ",
-  "Bags & Wallets": "កាបូបយួរ & កាបូបលុយ",
-  "Keys & Lanyards": "សោ & ខ្សែពាក់សោ",
-  "Books & Stationery": "សៀវភៅ & ឧបករណ៍សិក្សា",
-  "Apparel & Accessories": "សម្លៀកបំពាក់ & គ្រឿងអលង្ការ",
-  "Other Items": "វត្ថុផ្សេងៗ"
+  "Electronics & Gadgets": { km: "ឧបករណ៍អេឡិចត្រូនិក", ja: "電子機器・ガジェット" },
+  "IDs & Cards": { km: "កាតសម្គាល់ខ្លួន & កាតផ្សេងៗ", ja: "身分証・カード類" },
+  "Bags & Wallets": { km: "កាបូបយួរ & កាបូបលុយ", ja: "バッグ・財布" },
+  "Keys & Lanyards": { km: "សោ & ខ្សែពាក់សោ", ja: "鍵・ストラップ" },
+  "Books & Stationery": { km: "សៀវភៅ & ឧបករណ៍សិក្សា", ja: "本・文房具" },
+  "Apparel & Accessories": { km: "សម្លៀកបំពាក់ & គ្រឿងអលង្ការ", ja: "衣類・アクセサリー" },
+  "Other Items": { km: "វត្ថុផ្សេងៗ", ja: "その他" }
 };
 
 export const locationTranslations = {
-  "RUPP Campus 1 — Building A (Humanities)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ A",
-  "RUPP Campus 1 — Building B (Science & IT)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ B",
-  "RUPP Campus 1 — IFL (Institute of Foreign Languages)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — IFL",
-  "RUPP Campus 1 — Central Library (បណ្ណាល័យ)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — បណ្ណាល័យកណ្តាល",
-  "RUPP Campus 1 — Sports Field & Canteen": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — តារាងកីឡា & អាហារដ្ឋាន",
-  "RUPP Campus 2 — Faculty of Engineering (FE)": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ២ — មហាវិទ្យាល័យវិស្វកម្ម",
-  "RUPP Campus 2 — Main Classroom Block": "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ២ — អាគារសិក្សាបន្ទប់មេ",
-  "RUPP — Building T": "RUPP — អាគារ T",
-  "RUPP — Building C": "RUPP — អាគារ C",
-  "RUPP — Building D": "RUPP — អាគារ D",
-  "RUPP — IT Building B": "RUPP — អាគារ IT B",
-  "RUPP — STEM Building": "RUPP — អាគារ STEM",
-  "RUPP — Faculty of Engineering": "RUPP — មហាវិទ្យាល័យវិស្វកម្ម",
-  "RUPP — Football Field": "RUPP — តារាងបាល់ទាត់",
-  "RUPP — Canteen (Cantinee RUPP)": "RUPP — អាហារដ្ឋាន",
-  "RUPP — DMC Café": "RUPP — DMC Café",
-  "RUPP — Motorcycle Parking": "RUPP — ទីតាំងផ្ញើម៉ូតូ",
-  "RUPP — Auditorium": "RUPP — សាលប្រជុំ",
-  "RUPP — Central Library (បណ្ណាល័យ)": "RUPP — បណ្ណាល័យកណ្តាល",
-  "RUPP — IFL (Institute of Foreign Languages)": "RUPP — IFL (វិទ្យាស្ថានភាសាបរទេស)"
+  "RUPP Campus 1 — Building A (Humanities)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ A", ja: "RUPP キャンパス1 — A棟 (人文学)" },
+  "RUPP Campus 1 — Building B (Science & IT)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — អាគារ B", ja: "RUPP キャンパス1 — B棟 (理学・IT)" },
+  "RUPP Campus 1 — IFL (Institute of Foreign Languages)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — IFL", ja: "RUPP キャンパス1 — IFL (外国語研究所)" },
+  "RUPP Campus 1 — Central Library (បណ្ណាល័យ)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — បណ្ណាល័យកណ្តាល", ja: "RUPP キャンパス1 — 中央図書館" },
+  "RUPP Campus 1 — Sports Field & Canteen": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ១ — តារាងកីឡា & អាហារដ្ឋាន", ja: "RUPP キャンパス1 — 運動場・学食" },
+  "RUPP Campus 2 — Faculty of Engineering (FE)": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ២ — មហាវិទ្យាល័យវិស្វកម្ម", ja: "RUPP キャンパス2 — 工学部 (FE)" },
+  "RUPP Campus 2 — Main Classroom Block": { km: "សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ យ៉ាងទី ២ — អាគារសិក្សាបន្ទប់មេ", ja: "RUPP キャンパス2 — メイン講義棟" },
+  "RUPP — Building T": { km: "RUPP — អាគារ T", ja: "RUPP — T棟" },
+  "RUPP — Building C": { km: "RUPP — អាគារ C", ja: "RUPP — C棟" },
+  "RUPP — Building D": { km: "RUPP — អាគារ D", ja: "RUPP — D棟" },
+  "RUPP — IT Building B": { km: "RUPP — អាគារ IT B", ja: "RUPP — IT B棟" },
+  "RUPP — STEM Building": { km: "RUPP — អាគារ STEM", ja: "RUPP — STEM棟" },
+  "RUPP — Faculty of Engineering": { km: "RUPP — មហាវិទ្យាល័យវិស្វកម្ម", ja: "RUPP — 工学部" },
+  "RUPP — Football Field": { km: "RUPP — តារាងបាល់ទាត់", ja: "RUPP — サッカー場" },
+  "RUPP — Canteen (Cantinee RUPP)": { km: "RUPP — អាហារដ្ឋាន", ja: "RUPP — 食堂" },
+  "RUPP — DMC Café": { km: "RUPP — DMC Café", ja: "RUPP — DMCカフェ" },
+  "RUPP — Motorcycle Parking": { km: "RUPP — ទីតាំងផ្ញើម៉ូតូ", ja: "RUPP — バイク駐輪場" },
+  "RUPP — Auditorium": { km: "RUPP — សាលប្រជុំ", ja: "RUPP — 講堂" },
+  "RUPP — Central Library (បណ្ណាល័យ)": { km: "RUPP — បណ្ណាល័យកណ្តាល", ja: "RUPP — 中央図書館" },
+  "RUPP — IFL (Institute of Foreign Languages)": { km: "RUPP — IFL (វិទ្យាស្ថានភាសាបរទេស)", ja: "RUPP — IFL (外国語研究所)" }
 };
 
 export function getCategoryName(name, lang = 'en') {
   if (!name) return '';
-  if (lang === 'km' && categoryTranslations[name]) {
-    return categoryTranslations[name];
+  if (categoryTranslations[name] && categoryTranslations[name][lang]) {
+    return categoryTranslations[name][lang];
   }
   return name;
 }
 
 export function getLocationName(name, lang = 'en') {
   if (!name) return '';
-  if (lang === 'km' && locationTranslations[name]) {
-    return locationTranslations[name];
+  if (locationTranslations[name] && locationTranslations[name][lang]) {
+    return locationTranslations[name][lang];
   }
   return name;
 }

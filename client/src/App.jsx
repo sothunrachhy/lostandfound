@@ -13,11 +13,8 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('lang', lang);
-    if (lang === 'km') {
-      document.body.classList.add('lang-km');
-    } else {
-      document.body.classList.remove('lang-km');
-    }
+    document.body.classList.toggle('lang-km', lang === 'km');
+    document.body.classList.toggle('lang-ja', lang === 'ja');
   }, [lang]);
 
   // Session — persisted in localStorage

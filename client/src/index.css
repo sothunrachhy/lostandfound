@@ -5,6 +5,7 @@
     --font-heading: 'Outfit', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
     --font-body: 'Plus Jakarta Sans', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
     --font-khmer: 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
+    --font-japanese: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Meiryo', sans-serif;
     --teal:    #0f766e;
     --teal-lt: #14b8a6;
     --teal-bg: #f0fdfa;
@@ -39,6 +40,10 @@
   body.lang-km .font-extrabold,
   body.lang-km .font-black {
     font-weight: 500 !important;
+  }
+
+  html[lang="ja"], body.lang-ja, [lang="ja"] {
+    font-family: var(--font-japanese) !important;
   }
 }
 

@@ -149,7 +149,7 @@ app.delete('/api/users/:id', async (req, res) => {
   try {
     await q('DELETE FROM notifications WHERE user_id=$1', [userId]);
     await q('DELETE FROM messages WHERE sender_id=$1 OR receiver_id=$1', [userId]);
-    await q('DELETE FROM claims WHERE owner_id=$1', [userId]);
+    await q('DELETE FROM claims WHERE owner_id=$1 OR finder_id=$1', [userId]);
     await q('DELETE FROM lost_items WHERE user_id=$1', [userId]);
     await q('DELETE FROM found_items WHERE user_id=$1', [userId]);
 
