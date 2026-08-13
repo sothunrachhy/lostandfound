@@ -39,7 +39,6 @@ export default function Navbar({
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight shrink-0">LF SYSTEM</span>
-            <span className="hidden sm:inline text-[9px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full uppercase tracking-wide shrink-0">Student</span>
           </div>
         </div>
 
