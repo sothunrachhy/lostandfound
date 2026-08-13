@@ -507,18 +507,22 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
                     {recipient.ProfileImage || recipient.profile_image ? (
                       <img src={recipient.ProfileImage || recipient.profile_image} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      recipient.Name?.charAt(0).toUpperCase() || 'U'
+                      recipient.Name?.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'U'
                     )}
                   </div>
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-sm font-bold text-slate-800 truncate">{recipient.Name}</h4>
-                  <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    recipient.RoleName === 'Admin' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-teal-50 text-teal-700 border border-teal-200'
-                  }`}>
-                    {recipient.RoleName || 'User'}
-                  </span>
+                  <h4 className="text-sm font-extrabold text-slate-900 truncate leading-snug">{recipient.Name}</h4>
+                  <div className="mt-0.5">
+                    <span className={`inline-flex items-center text-[10px] font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs ${
+                      recipient.RoleName === 'Admin' || recipient.RoleID === 2
+                        ? 'bg-amber-50/90 text-amber-700 border-amber-300'
+                        : 'bg-teal-50/90 text-teal-700 border-teal-300'
+                    }`}>
+                      {recipient.RoleName || (recipient.RoleID === 2 ? 'Admin' : 'User')}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (
