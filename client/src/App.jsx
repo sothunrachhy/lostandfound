@@ -375,7 +375,7 @@ export default function App() {
         recipient={chatRecipient} allUsers={allUsers}
         onSelectRecipient={(u) => { setChatRecipient(u); handleFetchMessages(u.UserID); }}
         onSend={handleSendMessage} onFetchMessages={handleFetchMessages}
-        onApproveDirect={handleApproveDirect} />
+        onApproveDirect={handleApproveDirect} lang={lang} />
 
       <NotificationsDrawer isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)}
         notifications={notifications} onMarkRead={handleMarkNotifRead} />
