@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, MessageSquare, PlusCircle, LogOut, Compass, ChevronDown, User } from 'lucide-react';
+import { translations } from '../translations';
 
 export default function Navbar({
   currentUser, unreadCount, lang = 'en', onLangChange,
@@ -8,6 +9,8 @@ export default function Navbar({
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [imgError, setImgError] = useState(false);
   const langRef = useRef(null);
+
+  const t = translations[lang] || translations.en;
 
   useEffect(() => {
     setImgError(false);
@@ -44,11 +47,11 @@ export default function Navbar({
         <div className="hidden lg:flex items-center gap-2 shrink-0">
           <button onClick={() => onOpenReport('lost')}
             className="btn-primary text-xs py-2 px-4 rounded-xl cursor-pointer">
-            <PlusCircle className="w-3.5 h-3.5" /> {lang === 'km' ? 'រាយការណ៍វត្ថុបាត់' : 'Report Lost'}
+            <PlusCircle className="w-3.5 h-3.5" /> {t.reportLost}
           </button>
           <button onClick={() => onOpenReport('found')}
             className="btn-outline text-xs py-2 px-4 rounded-xl cursor-pointer">
-            <PlusCircle className="w-3.5 h-3.5" /> {lang === 'km' ? 'រាយការណ៍វត្ថុប្រទះឃើញ' : 'Report Found'}
+            <PlusCircle className="w-3.5 h-3.5" /> {t.reportFound}
           </button>
         </div>
 
