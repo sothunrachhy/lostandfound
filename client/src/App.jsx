@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, ShieldCheck, ExternalLink, Sparkles, Phone, Mail, MapPin, Info, CheckCircle2, Bookmark, ChevronRight, Clock, Building2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal, ItemDetailModal, ConfirmModal } from './components/Modals';
@@ -320,35 +319,8 @@ export default function App() {
     return <AuthPage onLogin={handleLogin} onRegister={handleRegister} />;
   }
 
-  const ruppStats = [
-    { label: 'Students', value: '20,000+' },
-    { label: 'Faculties', value: '23' },
-    { label: 'Programs', value: '70+' },
-    { label: 'Est.', value: '1960' },
-  ];
-
-  const ruppLinks = [
-    { label: 'RUPP Official Website', href: 'https://www.rupp.edu.kh' },
-    { label: 'Student Affairs Portal', href: 'https://www.rupp.edu.kh' },
-    { label: 'Campus Safety Office', href: 'https://www.rupp.edu.kh' },
-    { label: 'Academic Calendar', href: 'https://www.rupp.edu.kh' },
-  ];
-
-  const campusTips = [
-    { text: 'Report lost items within 24h for maximum recovery chance' },
-    { text: 'Keep serial numbers & private identifiers confidential' },
-    { text: 'Include clear, well-lit photos when reporting items' },
-    { text: 'Use live student chat to arrange safe item return' },
-  ];
-
-  const ruppNews = [
-    { tag: 'POLICY', color: 'border-l-rose-500 bg-rose-50/50 text-rose-700', title: 'Monthly Unclaimed Donations', desc: 'Unclaimed items after 30 days are transferred to student charity.' },
-    { tag: 'HOURS', color: 'border-l-teal-600 bg-teal-50/50 text-teal-800', title: 'Campus Safety Hours', desc: 'Mon–Fri, 8:00 AM – 5:00 PM (Building A, Ground Floor).' },
-    { tag: 'ADVICE', color: 'border-l-amber-500 bg-amber-50/50 text-amber-800', title: 'Tag Personal Belongings', desc: 'Write Student ID on laptops, keys & water bottles.' },
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/60">
+    <div className="min-h-screen flex flex-col">
       <Navbar
         currentUser={currentUser}
         unreadCount={unreadCount}
@@ -361,156 +333,23 @@ export default function App() {
         onLogout={promptLogout}
       />
 
-      {/* ── 3-column layout ── */}
-      <div className="flex-1 w-full max-w-[1440px] mx-auto flex gap-0 xl:gap-6 px-0 xl:px-6 py-6 items-start">
-
-        {/* ── LEFT SIDEBAR — RUPP Identity & Links ── */}
-        <aside className="hidden xl:flex flex-col gap-4 w-60 shrink-0 sticky top-20 self-start">
-
-          {/* RUPP Institution Card */}
-          <div className="bg-white/90 backdrop-blur-xs border border-slate-200/80 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition-all duration-300 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-teal-500/10 via-teal-500/5 to-transparent rounded-bl-full pointer-events-none" />
-            <div className="relative">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-700 to-teal-900 text-white flex items-center justify-center shrink-0 shadow-sm border border-teal-600/30">
-                  <GraduationCap className="w-5 h-5 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-xs font-black text-slate-900 leading-snug tracking-tight">Royal University of Phnom Penh</h3>
-                  <p className="text-[11px] text-teal-700 font-bold tracking-tight font-khmer mt-0.5">សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ</p>
-                </div>
-              </div>
-              <div className="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
-                {ruppStats.map(s => (
-                  <div key={s.label} className="bg-teal-50/40 border border-teal-100/60 rounded-xl p-2 text-center">
-                    <p className="text-xs font-black text-teal-800 tracking-tight">{s.value}</p>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Campus Recovery Guidelines */}
-          <div className="bg-white/90 backdrop-blur-xs border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center gap-2 mb-3 text-slate-900">
-              <ShieldCheck className="w-4 h-4 text-teal-600" />
-              <p className="text-[11px] font-black uppercase tracking-wider text-slate-700">Campus Guidelines</p>
-            </div>
-            <div className="space-y-2.5">
-              {campusTips.map((tip, i) => (
-                <div key={i} className="flex gap-2 items-start">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-slate-600 leading-snug font-medium">{tip.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* RUPP Official Links */}
-          <div className="bg-white/90 backdrop-blur-xs border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center gap-2 mb-3 text-slate-900">
-              <Bookmark className="w-4 h-4 text-teal-600" />
-              <p className="text-[11px] font-black uppercase tracking-wider text-slate-700">Quick Resources</p>
-            </div>
-            <div className="space-y-1.5">
-              {ruppLinks.map((link, i) => (
-                <a
-                  key={i}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-2 rounded-xl text-[11px] text-slate-600 hover:text-teal-800 hover:bg-teal-50/70 font-semibold transition-all group"
-                >
-                  <span className="truncate">{link.label}</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-teal-600 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                </a>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* ── CENTER CONTENT ── */}
-        <main className="flex-1 min-w-0 px-4 xl:px-0">
-          <HomePage
-            lostItems={lostItems}
-            foundItems={foundItems}
-            matches={matches}
-            categories={categories}
-            locations={locations}
-            currentUser={currentUser}
-            lang={lang}
-            onOpenReport={(mode) => { setReportMode(mode); setIsReportOpen(true); }}
-            onOpenClaim={handleOpenClaim}
-            onOpenChat={handleOpenChat}
-            onDeleteReport={handleDeleteReport}
-            onApproveDirect={handleApproveDirect}
-            onSelectItem={(item) => setSelectedDetailItem(item)}
-          />
-        </main>
-
-        {/* ── RIGHT SIDEBAR — RUPP News & Safety Hotline ── */}
-        <aside className="hidden xl:flex flex-col gap-4 w-60 shrink-0 sticky top-20 self-start">
-
-          {/* Campus Announcements */}
-          <div className="bg-white/90 backdrop-blur-xs border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center gap-2 mb-3 text-slate-900">
-              <Sparkles className="w-4 h-4 text-teal-600" />
-              <p className="text-[11px] font-black uppercase tracking-wider text-slate-700">Campus Bulletins</p>
-            </div>
-            <div className="space-y-2.5">
-              {ruppNews.map((n, i) => (
-                <div key={i} className={`rounded-xl border-l-3 p-2.5 shadow-2xs ${n.color}`}>
-                  <span className="text-[9px] font-black uppercase tracking-wider">{n.tag}</span>
-                  <p className="text-[11px] font-bold text-slate-900 mt-0.5 leading-snug">{n.title}</p>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-snug">{n.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Campus Safety Hotline */}
-          <div className="bg-gradient-to-br from-slate-900 via-teal-950 to-teal-900 rounded-2xl p-4 shadow-md text-white relative overflow-hidden">
-            <div className="flex items-center gap-2 text-teal-300 mb-2">
-              <ShieldCheck className="w-4 h-4" />
-              <p className="text-[10px] font-black uppercase tracking-wider">Campus Safety</p>
-            </div>
-            <h4 className="text-xs font-bold text-white leading-tight">Student Affairs Office</h4>
-            <p className="text-[10px] text-teal-200 mt-0.5">Royal University of Phnom Penh</p>
-
-            <div className="mt-3 pt-3 border-t border-white/10 space-y-2 text-[10px]">
-              <div className="flex items-center gap-2 text-slate-200">
-                <Phone className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                <span className="font-semibold">+855 23 880 009</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-200">
-                <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                <span className="font-semibold truncate">info@rupp.edu.kh</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-200">
-                <MapPin className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                <span className="font-semibold">Russian Federation Blvd, Phnom Penh</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Platform Security Badge */}
-          <div className="bg-white/90 backdrop-blur-xs border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center gap-2 mb-2 text-slate-900">
-              <Info className="w-4 h-4 text-teal-600" />
-              <p className="text-[11px] font-black uppercase tracking-wider text-slate-700">Platform Specs</p>
-            </div>
-            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-              Official student recovery platform powered by AI match verification & instant peer messaging.
-            </p>
-            <div className="mt-2.5 flex flex-wrap gap-1">
-              {['AI Matching', 'Encrypted Chat', 'Student ID Verified'].map(tag => (
-                <span key={tag} className="text-[9px] bg-teal-50 text-teal-700 border border-teal-200/80 rounded-full px-2 py-0.5 font-bold">{tag}</span>
-              ))}
-            </div>
-          </div>
-        </aside>
-      </div>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8">
+        <HomePage
+          lostItems={lostItems}
+          foundItems={foundItems}
+          matches={matches}
+          categories={categories}
+          locations={locations}
+          currentUser={currentUser}
+          lang={lang}
+          onOpenReport={(mode) => { setReportMode(mode); setIsReportOpen(true); }}
+          onOpenClaim={handleOpenClaim}
+          onOpenChat={handleOpenChat}
+          onDeleteReport={handleDeleteReport}
+          onApproveDirect={handleApproveDirect}
+          onSelectItem={(item) => setSelectedDetailItem(item)}
+        />
+      </main>
 
       <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-center">
