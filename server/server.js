@@ -14,8 +14,8 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Vercel Serverless Function route prefix normalizer
 app.use((req, res, next) => {
-  if (req.url.startsWith('/api/') && req.url !== '/api') {
-    // Keep req.url untouched for Express routes matching /api/*
+  if (!req.url.startsWith('/api')) {
+    req.url = '/api' + (req.url.startsWith('/') ? '' : '/') + req.url;
   }
   next();
 });
