@@ -66,7 +66,7 @@ export default function App() {
       fetch(`${API}/api/users/heartbeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentAdmin.UserID })
+        body: JSON.stringify({ userId: currentAdmin.UserID || currentAdmin.user_id })
       }).catch(() => {});
     };
     sendHeartbeat();

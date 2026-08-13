@@ -134,13 +134,13 @@ app.get('/api/users', async (_req, res) => {
 });
 
 app.post('/api/users/heartbeat', async (req, res) => {
-  const { userId } = req.body;
-  if (!userId) return res.status(400).json({ success: false });
+  const userId = req.body.userId || req.body.UserID || req.body.user_id;
+  if (!userId) return res.json({ success: false, message: 'No userId provided' });
   try {
     await q('UPDATE users SET last_active=NOW() WHERE user_id=$1', [userId]);
     res.json({ success: true });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.json({ success: false, message: e.message });
   }
 });
 
