@@ -67,7 +67,7 @@ export default function Navbar({
                 alt=""
                 className="w-4.5 h-3 sm:w-5 sm:h-3.5 object-cover rounded-sm shadow-xs shrink-0"
               />
-              <span className="uppercase text-[11px] sm:text-xs">{lang}</span>
+              <span translate="no" className="notranslate uppercase text-[11px] sm:text-xs">{lang}</span>
               <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
             </button>
 
