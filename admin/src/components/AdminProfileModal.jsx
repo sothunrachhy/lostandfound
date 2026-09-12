@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { X, User, Camera } from 'lucide-react';
 
@@ -6,17 +6,15 @@ export default function AdminProfileModal({ isOpen, onClose, currentAdmin, onSav
   // Hooks run before any early return: this component stays mounted while
   // closed, so returning null first would change the hook count between
   // renders and React would throw when the modal opened.
-  const [form, setForm] = useState({ name: '', phone: '', profileImage: '' });
-
-  // Refill from the current record each time the modal opens.
-  useEffect(() => {
-    if (!isOpen || !currentAdmin) return;
-    setForm({
-      name: currentAdmin.Name || '',
-      phone: currentAdmin.Phone || '',
-      profileImage: currentAdmin.ProfileImage || '',
-    });
-  }, [isOpen, currentAdmin]);
+  //
+  // The parent keys this component on its open state, so it remounts each
+  // time it opens and this initialiser re-reads the current record. That
+  // replaces an effect that copied props into state on every open.
+  const [form, setForm] = useState(() => ({
+    name: currentAdmin?.Name || '',
+    phone: currentAdmin?.Phone || '',
+    profileImage: currentAdmin?.ProfileImage || '',
+  }));
 
   if (!isOpen || !currentAdmin) return null;
 

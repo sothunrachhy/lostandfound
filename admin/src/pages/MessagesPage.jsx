@@ -176,7 +176,7 @@ function AdminLocationModal({ isOpen, onClose, onSendLocation }) {
 }
 
 export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [chosenUser, setChosenUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');
@@ -209,11 +209,9 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
     (u.StudentID && u.StudentID.toLowerCase().includes(search.toLowerCase()))
   );
 
-  useEffect(() => {
-    if (!selectedUser && filteredUsers.length > 0) {
-      setSelectedUser(filteredUsers[0]);
-    }
-  }, [users]);
+  // Until a conversation is picked, fall back to the first in the list so the
+  // panel is never empty. Derived, so no effect has to write it back.
+  const selectedUser = chosenUser || filteredUsers[0] || null;
 
   const fetchThread = async () => {
     if (!selectedUser) return;
@@ -326,7 +324,7 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
               return (
                 <div
                   key={u.UserID}
-                  onClick={() => setSelectedUser(u)}
+                  onClick={() => setChosenUser(u)}
                   className={`p-3.5 flex items-center gap-3 cursor-pointer transition-colors ${
                     isSelected ? 'bg-teal-50/80 border-l-4 border-teal-600' : 'hover:bg-white'
                   }`}

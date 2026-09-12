@@ -343,7 +343,7 @@ export default function App() {
         </main>
       </div>
 
-      <AdminProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
+      <AdminProfileModal key={isProfileOpen ? 'open' : 'closed'} isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
         currentAdmin={currentAdmin} onSaveProfile={handleSaveProfile} />
 
       <NotificationModal isOpen={modalNotify.isOpen} onClose={() => setModalNotify(m => ({ ...m, isOpen: false }))}

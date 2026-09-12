@@ -7,14 +7,13 @@ export default function Navbar({
   onOpenNotifs, onOpenChat, onOpenReport, onOpenProfile, onLogout
 }) {
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [imgError, setImgError] = useState(false);
+  // Remembering *which* url failed means a new avatar is retried
+  // automatically, with no effect needed to clear a flag.
+  const [erroredSrc, setErroredSrc] = useState(null);
+  const imgError = !!currentUser?.ProfileImage && erroredSrc === currentUser.ProfileImage;
   const langRef = useRef(null);
 
   const t = translations[lang] || translations.en;
-
-  useEffect(() => {
-    setImgError(false);
-  }, [currentUser?.ProfileImage]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -153,7 +152,7 @@ export default function Navbar({
               <img
                 src={currentUser.ProfileImage}
                 alt={currentUser.Name || ''}
-                onError={() => setImgError(true)}
+                onError={() => setErroredSrc(currentUser?.ProfileImage)}
                 className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0"
               />
             ) : (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Upload, Trash2 } from 'lucide-react';
 import { getCategoryName, getLocationName } from '../../translations';
 import { compressImage } from './compressImage';
@@ -9,15 +9,11 @@ export function ReportModal({ isOpen, onClose, mode, categories, locations, curr
   const [isCompressing, setIsCompressing] = useState(false);
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
-  React.useEffect(() => {
-    if (isOpen) {
-      setForm(f => ({
-        ...f,
-        CategoryID: f.CategoryID || (categories && categories[0] ? categories[0].CategoryID : ''),
-        LocationID: f.LocationID || (locations && locations[0] ? locations[0].LocationID : '')
-      }));
-    }
-  }, [isOpen, categories, locations]);
+  // Until the user picks, show the first option. Derived rather than copied
+  // into state, so it is correct however late the lists arrive. Submit
+  // already falls back to the same first option.
+  const categoryId = form.CategoryID || categories?.[0]?.CategoryID || '';
+  const locationId = form.LocationID || locations?.[0]?.LocationID || '';
 
   if (!isOpen) return null;
 
@@ -85,7 +81,7 @@ export function ReportModal({ isOpen, onClose, mode, categories, locations, curr
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Category *</label>
               <CustomSelectModal
-                value={form.CategoryID}
+                value={categoryId}
                 options={categories.map(c => ({ id: c.CategoryID, label: getCategoryName(c.CategoryName, lang) }))}
                 placeholder="Select Category"
                 onChange={(val) => setForm(f => ({ ...f, CategoryID: val }))}
@@ -94,7 +90,7 @@ export function ReportModal({ isOpen, onClose, mode, categories, locations, curr
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Location *</label>
               <CustomSelectModal
-                value={form.LocationID}
+                value={locationId}
                 options={locations.map(l => ({ id: l.LocationID, label: getLocationName(l.LocationName, lang) }))}
                 placeholder="Select Location"
                 onChange={(val) => setForm(f => ({ ...f, LocationID: val }))}

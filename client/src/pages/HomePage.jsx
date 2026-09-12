@@ -16,13 +16,10 @@ const formatReportTime = (item) => {
 
 
 function ItemImage({ src, alt, type = 'lost' }) {
-  const [imgSrc, setImgSrc] = useState(src || '');
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    setImgSrc(src || '');
-    setHasError(false);
-  }, [src]);
+  // Which url failed, not a boolean: a changed src is retried on its own,
+  // so no effect is needed to clear the flag.
+  const [erroredSrc, setErroredSrc] = useState(null);
+  const hasError = !!src && erroredSrc === src;
 
   if (!src || hasError) {
     return (
@@ -38,9 +35,9 @@ function ItemImage({ src, alt, type = 'lost' }) {
 
   return (
     <img
-      src={imgSrc}
+      src={src}
       alt={alt}
-      onError={() => setHasError(true)}
+      onError={() => setErroredSrc(src)}
       className="w-full h-full object-cover img-zoom"
     />
   );

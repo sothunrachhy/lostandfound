@@ -5,6 +5,8 @@ import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal,
 import { translations } from './translations';
 import { setToken, clearToken, setUnauthorizedHandler } from './auth';
 import { usePolling } from './usePolling';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import NotFound from './pages/NotFound';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -12,7 +14,8 @@ export default function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('lf_lang') || 'en');
   const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
   const [logoutConfirmModal, setLogoutConfirmModal] = useState({ isOpen: false, title: '', message: '', confirmText: 'Sign Out', onConfirm: () => {} });
-  const [selectedDetailItem, setSelectedDetailItem] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     document.documentElement.setAttribute('lang', lang);
@@ -363,7 +366,16 @@ export default function App() {
     );
   }
 
-  return (
+  // Which item is open is part of the address, so a specific item can be
+  // linked to or shared, and the back button closes the detail view.
+  const detailRoute = /^\/item\/(lost|found)\/(\d+)\/?$/.exec(location.pathname);
+  const selectedDetailItem = !detailRoute
+    ? null
+    : (detailRoute[1] === 'lost'
+        ? lostItems.find((i) => String(i.LostID) === detailRoute[2])
+        : foundItems.find((i) => String(i.FoundID) === detailRoute[2])) || null;
+
+  const board = (
     <div className="min-h-screen flex flex-col">
       <Navbar
         currentUser={currentUser}
@@ -391,7 +403,9 @@ export default function App() {
           onOpenChat={handleOpenChat}
           onDeleteReport={handleDeleteReport}
           onApproveDirect={handleApproveDirect}
-          onSelectItem={(item) => setSelectedDetailItem(item)}
+          onSelectItem={(item) =>
+            navigate(item.LostID ? `/item/lost/${item.LostID}` : `/item/found/${item.FoundID}`)
+          }
         />
       </main>
 
@@ -419,10 +433,10 @@ export default function App() {
       <NotificationsDrawer isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)}
         notifications={notifications} onMarkRead={handleMarkNotifRead} />
 
-      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
+      <ProfileModal key={isProfileOpen ? 'open' : 'closed'} isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
         currentUser={currentUser} onSaveProfile={handleSaveProfile} />
 
-      <ItemDetailModal isOpen={!!selectedDetailItem} onClose={() => setSelectedDetailItem(null)}
+      <ItemDetailModal isOpen={!!selectedDetailItem} onClose={() => navigate('/')}
         item={selectedDetailItem} currentUser={currentUser} onOpenChat={handleOpenChat}
         onOpenClaim={handleOpenClaim} onApproveDirect={handleApproveDirect} onDeleteReport={handleDeleteReport} lang={lang} />
 
@@ -433,6 +447,15 @@ export default function App() {
         title={logoutConfirmModal.title} message={logoutConfirmModal.message} confirmText={logoutConfirmModal.confirmText}
         cancelText={t.cancel} lang={lang} onConfirm={logoutConfirmModal.onConfirm} />
     </div>
+  );
+
+  return (
+    <Routes>
+      <Route path="/" element={board} />
+      {/* Same board underneath; the address decides which item is open. */}
+      <Route path="/item/:kind/:id" element={board} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 

@@ -1,25 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Upload } from 'lucide-react';
 import { compressImage } from './compressImage';
 
 export function ProfileModal({ isOpen, onClose, currentUser, onSaveProfile }) {
-  const [form, setForm] = useState({
+  // The parent keys this component on its open state, so it remounts each
+  // time it opens and this initialiser re-reads the current profile. That
+  // replaces an effect that copied props into state.
+  const [form, setForm] = useState(() => ({
     Name: currentUser?.Name || '',
     Phone: currentUser?.Phone || '',
     StudentID: currentUser?.StudentID || '',
     ProfileImage: currentUser?.ProfileImage || ''
-  });
-
-  React.useEffect(() => {
-    if (currentUser) {
-      setForm({
-        Name: currentUser.Name || '',
-        Phone: currentUser.Phone || '',
-        StudentID: currentUser.StudentID || '',
-        ProfileImage: currentUser.ProfileImage || ''
-      });
-    }
-  }, [currentUser]);
+  }));
 
   if (!isOpen || !currentUser) return null;
 
