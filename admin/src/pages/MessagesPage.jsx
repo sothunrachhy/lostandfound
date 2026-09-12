@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import OnlineDot from '../components/OnlineDot';
-import { MessageSquare, Send, User, Search, CheckCheck, X, Phone, Mail, CreditCard, Shield, Image as ImageIcon, MapPin, Navigation, ExternalLink, Check } from 'lucide-react';
+import { MessageSquare, Send, User, Search, CheckCheck, X, Phone, Mail, CreditCard, Image as ImageIcon, MapPin, Navigation, ExternalLink, Check } from 'lucide-react';
 
 const compressImage = (file, maxDimension = 900, quality = 0.75, callback) => {
   const reader = new FileReader();
@@ -468,7 +468,7 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
                         )}
 
                         <div className={`flex items-center justify-end gap-1 text-[9px] mt-1.5 opacity-70 font-mono ${isMe ? 'text-teal-100' : 'text-slate-400'}`}>
-                          <span>{new Date(m.Timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span>{m.Timestamp ? new Date(m.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
                           {isMe && <CheckCheck className="w-3 h-3 text-teal-200" />}
                         </div>
                       </div>

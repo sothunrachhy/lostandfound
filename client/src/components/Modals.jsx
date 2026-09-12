@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search, MapPin, Calendar, Tag, MessageCircle, LogOut, AlertCircle, Image as ImageIcon, Navigation, ExternalLink } from 'lucide-react';
+import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, Users, Search, MapPin, Calendar, Tag, MessageCircle, Image as ImageIcon, Navigation, ExternalLink } from 'lucide-react';
 import { translations, getCategoryName, getLocationName } from '../translations';
 import OnlineDot from './OnlineDot';
 
@@ -711,7 +711,7 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
                     )}
 
                     <span className={`text-[9px] block text-right mt-1 font-mono ${isMe ? 'text-teal-200' : 'text-slate-400'}`}>
-                      {new Date(m.Timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {m.Timestamp ? new Date(m.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                     </span>
                   </div>
                 </div>

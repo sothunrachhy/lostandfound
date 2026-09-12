@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ShieldCheck, User, Search, FileText, CheckCircle, XCircle, Package, Calendar, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { ShieldCheck, Search, FileText, CheckCircle, XCircle, Package, Calendar, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function ClaimsPage({ claims, onUpdateClaim, onDeleteClaim }) {
@@ -77,7 +77,7 @@ export default function ClaimsPage({ claims, onUpdateClaim, onDeleteClaim }) {
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(claim.SubmittedAt || Date.now()).toLocaleString()}
+                      {claim.SubmittedAt ? new Date(claim.SubmittedAt).toLocaleString() : '—'}
                     </span>
                     {onDeleteClaim && (
                       <button

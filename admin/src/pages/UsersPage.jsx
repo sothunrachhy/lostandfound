@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import OnlineDot from '../components/OnlineDot';
 import ReactDOM from 'react-dom';
-import { Mail, Phone, CreditCard, X, User, Search, Trash2, UserPlus, ShieldCheck, Shield, Key } from 'lucide-react';
+import { Mail, Phone, CreditCard, X, Search, Trash2, UserPlus, ShieldCheck, Shield } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function UsersPage({ users, onDeleteUser, onCreateAdmin, onUpdateUserRole }) {
@@ -356,7 +356,6 @@ export default function UsersPage({ users, onDeleteUser, onCreateAdmin, onUpdate
                     const u = selectedUser;
                     const isCurrentlyAdmin = u.RoleID === 2 || u.RoleName === 'Admin';
                     const targetRole = isCurrentlyAdmin ? 1 : 2;
-                    const targetName = isCurrentlyAdmin ? 'Student' : 'Admin';
                     setSelectedUser(null);
                     setConfirmModal({
                       isOpen: true,

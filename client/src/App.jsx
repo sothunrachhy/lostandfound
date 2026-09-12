@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
-import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal, ItemDetailModal, ConfirmModal } from './components/Modals';
+import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, NotificationModal, ItemDetailModal, ConfirmModal } from './components/Modals';
 import { translations } from './translations';
 import { setToken, clearToken, setUnauthorizedHandler } from './auth';
 
@@ -45,6 +45,7 @@ export default function App() {
   const [matches, setMatches] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   // Modals
   const [reportMode, setReportMode] = useState('lost');
@@ -294,8 +295,6 @@ export default function App() {
       notify('Update Error', 'Error marking item as returned: ' + e.message, 'error');
     }
   };
-
-  const [allUsers, setAllUsers] = useState([]);
 
   const handleFetchMessages = async (targetUserId) => {
     if (!currentUser || !targetUserId) return;

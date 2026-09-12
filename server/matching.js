@@ -2,7 +2,6 @@
 
 function calculateMatchScore(lostItem, foundItem) {
   let score = 0;
-  let maxPossibleScore = 100;
   let matches = [];
 
   // 1. Category Match (30 Points)

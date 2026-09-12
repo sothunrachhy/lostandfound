@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Compass, ShieldCheck, LayoutDashboard, FileText, Users, Settings, MessageSquare, RefreshCw, LogOut, ChevronRight } from 'lucide-react';
+import { Compass, ShieldCheck, LayoutDashboard, FileText, Users, Settings, MessageSquare, RefreshCw, LogOut } from 'lucide-react';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard',  icon: LayoutDashboard },

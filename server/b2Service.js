@@ -36,7 +36,7 @@ async function uploadToB2(imageData) {
   }
 
   try {
-    const matches = imageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    const matches = imageData.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
     let buffer;
     let contentType = 'image/jpeg';
     let ext = 'jpg';

@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { X, User, Camera } from 'lucide-react';
 
 export default function AdminProfileModal({ isOpen, onClose, currentAdmin, onSaveProfile }) {
-  if (!isOpen || !currentAdmin) return null;
+  // Hooks run before any early return: this component stays mounted while
+  // closed, so returning null first would change the hook count between
+  // renders and React would throw when the modal opened.
+  const [form, setForm] = useState({ name: '', phone: '', profileImage: '' });
 
-  const [form, setForm] = useState({
-    name: currentAdmin.Name || '',
-    phone: currentAdmin.Phone || '',
-    profileImage: currentAdmin.ProfileImage || ''
-  });
+  // Refill from the current record each time the modal opens.
+  useEffect(() => {
+    if (!isOpen || !currentAdmin) return;
+    setForm({
+      name: currentAdmin.Name || '',
+      phone: currentAdmin.Phone || '',
+      profileImage: currentAdmin.ProfileImage || '',
+    });
+  }, [isOpen, currentAdmin]);
+
+  if (!isOpen || !currentAdmin) return null;
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];

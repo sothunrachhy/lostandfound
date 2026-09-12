@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Bell, MessageSquare, PlusCircle, LogOut, Compass, ChevronDown, User } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Bell, MessageSquare, PlusCircle, LogOut, Compass, ChevronDown } from 'lucide-react';
 import { translations } from '../translations';
 
 export default function Navbar({

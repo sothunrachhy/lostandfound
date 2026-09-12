@@ -1,4 +1,3 @@
-import React from 'react';
 import { FileSearch, Package, Clock, CheckCircle, Tag, MapPin } from 'lucide-react';
 
 export default function Dashboard({ stats, lostItems, foundItems, claims, categories, locations }) {

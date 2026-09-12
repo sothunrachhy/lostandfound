@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, Sparkles, MapPin, Calendar, Tag, MessageCircle, Plus, ArrowRight, X, RefreshCcw, AlertCircle, CheckCircle, Package, ChevronDown, Check, Clock } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, MapPin, Calendar, Tag, MessageCircle, X, RefreshCcw, AlertCircle, CheckCircle, Package, ChevronDown, Check } from 'lucide-react';
 import { translations, getCategoryName, getLocationName } from '../translations';
 
 const formatReportTime = (item) => {
@@ -14,7 +14,6 @@ const formatReportTime = (item) => {
   }
 };
 
-const DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80";
 
 function ItemImage({ src, alt, type = 'lost' }) {
   const [imgSrc, setImgSrc] = useState(src || '');

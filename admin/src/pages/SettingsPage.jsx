@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Tag, MapPin, Plus, Edit2, Trash2, Check, X } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 

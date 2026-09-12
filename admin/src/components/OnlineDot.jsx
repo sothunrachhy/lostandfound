@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * Presence indicator shown on a user's avatar: green when online, grey when not.
@@ -9,7 +8,7 @@ import React from 'react';
  *
  * The parent element must be positioned, e.g. `className="relative"`.
  */
-export function isUserOnline(user) {
+function isUserOnline(user) {
   return user?.isOnline === true || user?.IsOnline === true;
 }
 

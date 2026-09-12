@@ -64,7 +64,9 @@ app.post(['/api/auth/login', '/auth/login'], async (req, res) => {
 });
 
 app.post(['/api/auth/register', '/auth/register'], async (req, res) => {
-  const { name, email, password, phone, studentID, roleID, profileImage } = req.body;
+  // roleID is deliberately not read here: public registration is always a
+  // plain user. Admin accounts are created via POST /api/admin/users.
+  const { name, email, password, phone, studentID, profileImage } = req.body;
   if (!name || !email || !password)
     return res.status(400).json({ success: false, message: 'Name, email and password required' });
 
