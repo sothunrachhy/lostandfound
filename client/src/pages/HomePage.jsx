@@ -223,6 +223,11 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                 {item.Status === 'Claimed' && (
                   <span className="badge-claimed absolute top-3 right-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">{t.statusClaimed}</span>
                 )}
+                {item.ApprovalStatus === 'Pending' && (
+                  <span className="absolute bottom-3 left-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-amber-500 text-white shadow-sm">
+                    {t.statusPending || 'Pending review'}
+                  </span>
+                )}
               </div>
 
               <div
@@ -274,6 +279,11 @@ export default function HomePage({ lostItems, foundItems, matches, categories, l
                   ? <span className="badge-claimed absolute top-3 right-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">{t.statusClaimed}</span>
                   : <span className="badge-available absolute top-3 right-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">Available</span>
                 }
+                {item.ApprovalStatus === 'Pending' && (
+                  <span className="absolute bottom-3 left-3 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-amber-500 text-white shadow-sm">
+                    {t.statusPending || 'Pending review'}
+                  </span>
+                )}
               </div>
 
               <div

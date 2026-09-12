@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
-import { Trash2, AlertCircle, CheckCircle, Search, Package, MapPin, Calendar } from 'lucide-react';
+import { Trash2, AlertCircle, CheckCircle, Search, Package, MapPin, Calendar, Check, X } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
-export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
+export default function ReportsPage({ lostItems, foundItems, onDeleteReport, onSetApproval }) {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
-  const filteredLost = lostItems.filter(i =>
+  const matchesSearch = (i) =>
     (i.ItemName || '').toLowerCase().includes(search.toLowerCase()) ||
     (i.Description || '').toLowerCase().includes(search.toLowerCase()) ||
-    (i.LocationName || '').toLowerCase().includes(search.toLowerCase())
-  );
+    (i.LocationName || '').toLowerCase().includes(search.toLowerCase());
 
-  const filteredFound = foundItems.filter(i =>
-    (i.ItemName || '').toLowerCase().includes(search.toLowerCase()) ||
-    (i.Description || '').toLowerCase().includes(search.toLowerCase()) ||
-    (i.LocationName || '').toLowerCase().includes(search.toLowerCase())
-  );
+  // The Pending tab is the moderation queue: reports not yet on the student board.
+  const inTab = (i) => (tab === 'pending' ? i.ApprovalStatus === 'Pending' : true);
+
+  const filteredLost  = lostItems.filter(i => matchesSearch(i) && inTab(i));
+  const filteredFound = foundItems.filter(i => matchesSearch(i) && inTab(i));
+
+  const pendingCount =
+    lostItems.filter(i => i.ApprovalStatus === 'Pending').length +
+    foundItems.filter(i => i.ApprovalStatus === 'Pending').length;
 
   return (
     <div className="space-y-6 pb-16 fade-up">
@@ -50,6 +53,14 @@ export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
           All Reports ({lostItems.length + foundItems.length})
         </button>
         <button
+          onClick={() => setTab('pending')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            tab === 'pending' ? 'bg-amber-500 text-white shadow-xs' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+          }`}
+        >
+          Awaiting Approval ({pendingCount})
+        </button>
+        <button
           onClick={() => setTab('lost')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             tab === 'lost' ? 'bg-rose-600 text-white shadow-xs' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
@@ -70,7 +81,7 @@ export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Lost Reports Column */}
-        {(tab === 'all' || tab === 'lost') && (
+        {(tab === 'all' || tab === 'lost' || tab === 'pending') && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 pb-2">
               <AlertCircle className="w-4 h-4 text-rose-500" />
@@ -98,9 +109,21 @@ export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="text-xs font-bold text-slate-900 truncate">{item.ItemName}</h4>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
-                        Lost
-                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.ApprovalStatus === 'Pending' && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                            Pending
+                          </span>
+                        )}
+                        {item.ApprovalStatus === 'Rejected' && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                            Rejected
+                          </span>
+                        )}
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
+                          Lost
+                        </span>
+                      </div>
                     </div>
                     <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.Description || 'No description.'}</p>
                     <div className="flex items-center gap-3 text-[11px] text-slate-400 pt-1 font-medium">
@@ -108,18 +131,38 @@ export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
                       <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" />{item.DateLost}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setConfirmModal({
-                      isOpen: true,
-                      title: 'Delete Lost Report?',
-                      message: `Permanently delete report "${item.ItemName}" from database?`,
-                      onConfirm: () => onDeleteReport('lost', item.LostID)
-                    })}
-                    className="shrink-0 p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer border border-rose-200"
-                    title="Delete report"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="shrink-0 flex flex-col gap-1.5">
+                    {item.ApprovalStatus === 'Pending' && (
+                      <>
+                        <button
+                          onClick={() => onSetApproval('lost', item.LostID, 'Approved')}
+                          className="p-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 transition-colors cursor-pointer border border-teal-200"
+                          title="Approve — publish to the student board"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onSetApproval('lost', item.LostID, 'Rejected')}
+                          className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors cursor-pointer border border-amber-200"
+                          title="Reject — keep hidden"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => setConfirmModal({
+                        isOpen: true,
+                        title: 'Delete Lost Report?',
+                        message: `Permanently delete the report "${item.ItemName}"? This cannot be undone.`,
+                        onConfirm: () => onDeleteReport('lost', item.LostID)
+                      })}
+                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer border border-rose-200"
+                      title="Delete report"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -127,7 +170,7 @@ export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
         )}
 
         {/* Found Reports Column */}
-        {(tab === 'all' || tab === 'found') && (
+        {(tab === 'all' || tab === 'found' || tab === 'pending') && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 pb-2">
               <CheckCircle className="w-4 h-4 text-teal-600" />
@@ -155,9 +198,21 @@ export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="text-xs font-bold text-slate-900 truncate">{item.ItemName}</h4>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 shrink-0">
-                        Found
-                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.ApprovalStatus === 'Pending' && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                            Pending
+                          </span>
+                        )}
+                        {item.ApprovalStatus === 'Rejected' && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                            Rejected
+                          </span>
+                        )}
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200">
+                          Found
+                        </span>
+                      </div>
                     </div>
                     <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.Description || 'No description.'}</p>
                     <div className="flex items-center gap-3 text-[11px] text-slate-400 pt-1 font-medium">
@@ -165,18 +220,38 @@ export default function ReportsPage({ lostItems, foundItems, onDeleteReport }) {
                       <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" />{item.DateFound}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setConfirmModal({
-                      isOpen: true,
-                      title: 'Delete Found Report?',
-                      message: `Permanently delete report "${item.ItemName}" from database?`,
-                      onConfirm: () => onDeleteReport('found', item.FoundID)
-                    })}
-                    className="shrink-0 p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer border border-rose-200"
-                    title="Delete report"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="shrink-0 flex flex-col gap-1.5">
+                    {item.ApprovalStatus === 'Pending' && (
+                      <>
+                        <button
+                          onClick={() => onSetApproval('found', item.FoundID, 'Approved')}
+                          className="p-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 transition-colors cursor-pointer border border-teal-200"
+                          title="Approve — publish to the student board"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onSetApproval('found', item.FoundID, 'Rejected')}
+                          className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors cursor-pointer border border-amber-200"
+                          title="Reject — keep hidden"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => setConfirmModal({
+                        isOpen: true,
+                        title: 'Delete Found Report?',
+                        message: `Permanently delete the report "${item.ItemName}"? This cannot be undone.`,
+                        onConfirm: () => onDeleteReport('found', item.FoundID)
+                      })}
+                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer border border-rose-200"
+                      title="Delete report"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))
             )}

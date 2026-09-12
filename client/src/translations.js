@@ -12,6 +12,9 @@ export const translations = {
     statusLost: "Lost",
     statusFound: "Found",
     statusClaimed: "Claimed",
+    statusPending: "Pending review",
+    reportPendingTitle: "Sent for Review",
+    reportPendingMsg: "Your report was submitted. It appears on the campus board once an admin approves it.",
     claimItem: "Claim Item",
     iFoundThis: "I Found This",
     chat: "Chat",
@@ -58,7 +61,7 @@ export const translations = {
     profileUpdatedTitle: "Profile Updated!",
     profileUpdatedMsg: "Your profile information has been saved successfully.",
     signInFailed: "Sign In Failed",
-    connectionError: "Cannot connect to server."
+    connectionError: "Could not reach the service. Check your connection and try again."
   },
   km: {
     // Navbar & Buttons
@@ -73,6 +76,9 @@ export const translations = {
     statusLost: "បាត់បង់",
     statusFound: "រើសបាន",
     statusClaimed: "បានទាមទាររួច",
+    statusPending: "រង់ចាំការអនុម័ត",
+    reportPendingTitle: "បានផ្ញើដើម្បីត្រួតពិនិត្យ",
+    reportPendingMsg: "របាយការណ៍របស់អ្នកត្រូវបានផ្ញើ។ វានឹងបង្ហាញនៅលើក្ដារព័ត៌មាន បន្ទាប់ពីអ្នកគ្រប់គ្រងអនុម័ត។",
     claimItem: "ទាមទារវត្ថុ",
     iFoundThis: "ខ្ញុំបានឃើញវត្ថុនេះ",
     chat: "សារសន្ទនា",
@@ -119,7 +125,7 @@ export const translations = {
     profileUpdatedTitle: "ព័ត៌មានផ្ទាល់ខ្លួនត្រូវបានធ្វើបច្ចុប្បន្នភាព!",
     profileUpdatedMsg: "ព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នកត្រូវបានរក្សាទុកដោយជោគជ័យ។",
     signInFailed: "ការចូលគណនីបរាជ័យ",
-    connectionError: "មិនអាចភ្ជាប់ទៅម៉ាស៊ីនបម្រើបានទេ។"
+    connectionError: "មិនអាចភ្ជាប់សេវាកម្មបានទេ។ សូមពិនិត្យការតភ្ជាប់របស់អ្នក រួចព្យាយាមម្តងទៀត។"
   },
   ja: {
     // Navbar & Buttons
@@ -134,6 +140,9 @@ export const translations = {
     statusLost: "紛失",
     statusFound: "発見",
     statusClaimed: "受取済み",
+    statusPending: "承認待ち",
+    reportPendingTitle: "確認のため送信しました",
+    reportPendingMsg: "レポートを送信しました。管理者が承認するとキャンパス掲示板に表示されます。",
     claimItem: "受け取る（返還請求）",
     iFoundThis: "これを見つけました",
     chat: "チャット",
@@ -180,7 +189,7 @@ export const translations = {
     profileUpdatedTitle: "プロフィールが更新されました！",
     profileUpdatedMsg: "プロフィール情報が正常に保存されました。",
     signInFailed: "サインイン失敗",
-    connectionError: "サーバーに接続できません。"
+    connectionError: "接続できませんでした。通信状況を確認して、もう一度お試しください。"
   },
   ko: {
     // Navbar & Buttons
@@ -195,6 +204,9 @@ export const translations = {
     statusLost: "분실",
     statusFound: "습득",
     statusClaimed: "수령완료",
+    statusPending: "승인 대기 중",
+    reportPendingTitle: "검토 요청됨",
+    reportPendingMsg: "신고가 접수되었습니다. 관리자가 승인하면 캠퍼스 게시판에 표시됩니다.",
     claimItem: "반환 청구",
     iFoundThis: "이것을 습득함",
     chat: "채팅",
@@ -241,7 +253,7 @@ export const translations = {
     profileUpdatedTitle: "프로필 업데이트 완료!",
     profileUpdatedMsg: "프로필 정보가 성공적으로 저장되었습니다.",
     signInFailed: "로그인 실패",
-    connectionError: "서버에 연결할 수 없습니다."
+    connectionError: "연결할 수 없습니다. 네트워크 상태를 확인한 후 다시 시도해 주세요."
   },
   zh: {
     // Navbar & Buttons
@@ -256,6 +268,9 @@ export const translations = {
     statusLost: "遗失",
     statusFound: "招领",
     statusClaimed: "已认领",
+    statusPending: "等待审核",
+    reportPendingTitle: "已提交审核",
+    reportPendingMsg: "您的报告已提交。管理员审核通过后将显示在校园公告板上。",
     claimItem: "申请认领",
     iFoundThis: "我捡到了这个",
     chat: "在线沟通",
@@ -302,7 +317,7 @@ export const translations = {
     profileUpdatedTitle: "个人资料已更新！",
     profileUpdatedMsg: "您的个人资料已成功保存。",
     signInFailed: "登录失败",
-    connectionError: "无法连接到服务器。"
+    connectionError: "无法连接。请检查您的网络后重试。"
   }
 };
 

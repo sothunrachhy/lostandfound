@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, SuccessModal, NotificationModal, ItemDetailModal, ConfirmModal } from './components/Modals';
 import { translations } from './translations';
+import { setToken, clearToken, setUnauthorizedHandler } from './auth';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -26,6 +27,15 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
   const [showLogin, setShowLogin] = useState(!currentUser);
+
+  // Any rejected or expired token returns the app to the sign-in screen.
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      localStorage.removeItem('lf_user');
+      setCurrentUser(null);
+      setShowLogin(true);
+    });
+  }, []);
 
   // Data
   const [categories, setCategories] = useState([]);
@@ -60,21 +70,34 @@ export default function App() {
         fetch(`${API}/api/users`).then(r => r.json()),
       ]);
 
-      // Check if logged-in user still exists in database
-      const validUser = usersR?.find(u => u.UserID === currentUser.UserID);
-      if (!validUser) {
-        localStorage.removeItem('lf_user');
-        setCurrentUser(null);
-        setShowLogin(true);
-        return;
+      // A failed request answers with an error object, not a list, so coerce
+      // everything to an array before it reaches state.
+      const asList = (v) => (Array.isArray(v) ? v : []);
+
+      // Only judge whether the account still exists when the users request
+      // actually succeeded — a transient failure must not sign anyone out.
+      if (Array.isArray(usersR)) {
+        const validUser = usersR.find(u => u.UserID === currentUser.UserID);
+        if (!validUser) {
+          localStorage.removeItem('lf_user');
+          setCurrentUser(null);
+          setShowLogin(true);
+          return;
+        }
       }
 
-      setCategories(catR || []);
-      setLocations(locR || []);
-      setLostItems(lostR || []);
-      setFoundItems(foundR || []);
-      setMatches(matchR || []);
-      setNotifications(notifR || []);
+      // Refresh contacts on every poll so presence dots stay live while the
+      // chat drawer is open, instead of freezing at whatever it was on open.
+      if (Array.isArray(usersR)) {
+        setAllUsers(usersR.filter(u => u.UserID !== currentUser.UserID));
+      }
+
+      setCategories(asList(catR));
+      setLocations(asList(locR));
+      setLostItems(asList(lostR));
+      setFoundItems(asList(foundR));
+      setMatches(asList(matchR));
+      setNotifications(asList(notifR));
     } catch (e) {
       console.error('API error:', e);
     }
@@ -118,6 +141,7 @@ export default function App() {
           notify('Admin Account Detected', 'Admins must sign in via the Admin Portal.', 'info');
           return;
         }
+        setToken(data.token);
         localStorage.setItem('lf_user', JSON.stringify(data.user));
         setCurrentUser(data.user);
         setShowLogin(false);
@@ -125,7 +149,7 @@ export default function App() {
         notify('Sign In Failed', data.message || 'Invalid email or password', 'error');
       }
     } catch (e) {
-      notify('Connection Error', 'Cannot connect to server. Is the backend running?', 'error');
+      notify('Connection Problem', t.connectionError || 'Could not reach the service. Check your connection and try again.', 'error');
     }
   };
 
@@ -138,6 +162,7 @@ export default function App() {
       });
       const data = await res.json();
       if (data.success) {
+        setToken(data.token);
         localStorage.setItem('lf_user', JSON.stringify(data.user));
         setCurrentUser(data.user);
         setShowLogin(false);
@@ -145,13 +170,14 @@ export default function App() {
         notify('Registration Failed', data.message, 'error');
       }
     } catch (e) {
-      notify('Connection Error', 'Cannot connect to server.', 'error');
+      notify('Connection Problem', t.connectionError || 'Could not reach the service. Check your connection and try again.', 'error');
     }
   };
 
   const t = translations[lang] || translations.en;
 
   const handleLogout = () => {
+    clearToken();
     localStorage.removeItem('lf_user');
     setCurrentUser(null);
     setShowLogin(true);
@@ -199,12 +225,16 @@ export default function App() {
       const result = await res.json();
       if (result.success) {
         fetchData();
-        notify(t.reportCreatedTitle || 'Report Created!', t.reportCreatedMsg || 'Your report has been published to the campus board.', 'success');
+        notify(
+          t.reportPendingTitle || 'Sent for Review',
+          t.reportPendingMsg || 'Your report was submitted. It appears on the campus board once an admin approves it.',
+          'info'
+        );
       } else {
         notify('Submission Failed', result.message || 'Unknown error', 'error');
       }
     } catch (e) {
-      notify(t.connectionError || 'Connection Error', 'Error submitting report. Cannot connect to server.', 'error');
+      notify('Connection Problem', t.connectionError || 'Could not reach the service. Check your connection and try again.', 'error');
     }
   };
 
@@ -321,7 +351,19 @@ export default function App() {
   const unreadCount = notifications.filter(n => n.Status === 'Unread').length;
 
   if (showLogin || !currentUser) {
-    return <AuthPage onLogin={handleLogin} onRegister={handleRegister} />;
+    return (
+      <>
+        <AuthPage onLogin={handleLogin} onRegister={handleRegister} />
+        {/* Without this, a failed sign-in sets the message but renders nothing. */}
+        <NotificationModal
+          isOpen={successModal.isOpen}
+          onClose={() => setSuccessModal(s => ({ ...s, isOpen: false }))}
+          title={successModal.title}
+          message={successModal.message}
+          type={successModal.type}
+        />
+      </>
+    );
   }
 
   return (

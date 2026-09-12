@@ -9,6 +9,7 @@ import MessagesPage from './pages/MessagesPage';
 import NotificationModal from './components/NotificationModal';
 import AdminProfileModal from './components/AdminProfileModal';
 import ConfirmModal from './components/ConfirmModal';
+import { setToken, clearToken, setUnauthorizedHandler } from './auth';
 
 let rawAPI = import.meta.env.VITE_API_BASE_URL || 'https://lostandfound-two-lovat.vercel.app';
 if (rawAPI && !rawAPI.startsWith('http://') && !rawAPI.startsWith('https://')) {
@@ -43,16 +44,44 @@ export default function App() {
       const [sr, cr, lr, fr, ur, catr, locr] = await Promise.all([
         fetch(`${API}/api/admin/stats`).then(r => r.json()),
         fetch(`${API}/api/claims`).then(r => r.json()),
-        fetch(`${API}/api/lost-items`).then(r => r.json()),
-        fetch(`${API}/api/found-items`).then(r => r.json()),
+        fetch(`${API}/api/lost-items?approval=all`).then(r => r.json()),
+        fetch(`${API}/api/found-items?approval=all`).then(r => r.json()),
         fetch(`${API}/api/users`).then(r => r.json()),
         fetch(`${API}/api/categories`).then(r => r.json()),
         fetch(`${API}/api/locations`).then(r => r.json()),
       ]);
-      setStats(sr||{}); setClaims(cr||[]); setLostItems(lr||[]); setFoundItems(fr||[]);
-      setUsers(ur||[]); setCategories(catr||[]); setLocations(locr||[]);
+      // A failed request answers with an error object, not a list. `x || []`
+      // lets that object through (it is truthy) and later .filter/.map blows up.
+      const asList = (v) => (Array.isArray(v) ? v : []);
+      const asStats = (v) => (v && typeof v === 'object' && !Array.isArray(v) && v.success !== false ? v : {});
+
+      setStats(asStats(sr)); setClaims(asList(cr)); setLostItems(asList(lr)); setFoundItems(asList(fr));
+      setUsers(asList(ur)); setCategories(asList(catr)); setLocations(asList(locr));
     } catch (e) { console.error(e); }
   };
+
+  // The browser tab should name the view you are on, not just the app.
+  React.useEffect(() => {
+    const titles = {
+      dashboard: 'Dashboard',
+      claims:    'Claims Verification',
+      reports:   'Report Moderation',
+      messages:  'Live Messaging',
+      users:     'User Management',
+      settings:  'System Settings',
+    };
+    document.title = currentAdmin
+      ? `${titles[activePage] || 'Admin'} — LF System`
+      : 'LF System — Admin Control Center';
+  }, [activePage, currentAdmin]);
+
+  // Any rejected or expired token returns the portal to the sign-in screen.
+  React.useEffect(() => {
+    setUnauthorizedHandler(() => {
+      localStorage.removeItem('lf_admin');
+      setCurrentAdmin(null);
+    });
+  }, []);
 
   React.useEffect(() => {
     fetchData();
@@ -80,13 +109,15 @@ export default function App() {
       const data = await res.json();
       if (data.success) {
         if (data.user.RoleID !== 2) { notify('Access Restricted', 'Admin Portal is restricted to Admin accounts.', 'info'); return; }
+        setToken(data.token);
         localStorage.setItem('lf_admin', JSON.stringify(data.user));
         setCurrentAdmin(data.user);
       } else { notify('Sign In Failed', data.message || 'Invalid credentials', 'error'); }
-    } catch { notify('Connection Error', 'Cannot connect to API server.', 'error'); }
+    } catch { notify('Connection Problem', 'Could not reach the service. Check your connection and try again.', 'error'); }
   };
 
   const handleLogout = () => {
+    clearToken();
     localStorage.removeItem('lf_admin');
     setCurrentAdmin(null);
     notify('Signed Out', 'You have been signed out of Admin Control Center.', 'info');
@@ -107,7 +138,7 @@ export default function App() {
       const res = await fetch(`${API}/api/claims/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        notify('Claim Deleted', `Claim #${id} removed from database.`, 'info');
+        notify('Claim Deleted', `Claim #${id} has been permanently deleted.`, 'info');
         fetchData();
       } else {
         notify('Delete Failed', data.message || 'Cannot delete claim', 'error');
@@ -116,9 +147,34 @@ export default function App() {
       notify('Error', 'Failed to delete claim.', 'error');
     }
   };
+  const handleSetApproval = async (type, id, approval) => {
+    try {
+      const res = await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}/approval`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approval })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+        notify(
+          approval === 'Approved' ? 'Report Approved' : 'Report Rejected',
+          approval === 'Approved'
+            ? 'The report is now live on the student board and included in matching.'
+            : 'The report stays hidden and the student has been notified.',
+          approval === 'Approved' ? 'success' : 'info'
+        );
+      } else {
+        notify('Action Failed', data.message || 'Could not update the report.', 'error');
+      }
+    } catch (e) {
+      notify('Connection Problem', 'Could not reach the service. Check your connection and try again.', 'error');
+    }
+  };
+
   const handleCreateAdmin = async (adminData) => {
     try {
-      const res = await fetch(`${API}/api/auth/register`, {
+      const res = await fetch(`${API}/api/admin/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...adminData, roleID: 2 })
@@ -133,7 +189,7 @@ export default function App() {
         return false;
       }
     } catch {
-      notify('Error', 'Failed to connect to server.', 'error');
+      notify('Connection Problem', 'Could not reach the service. Check your connection and try again.', 'error');
       return false;
     }
   };
@@ -162,7 +218,7 @@ export default function App() {
       const res = await fetch(`${API}/api/users/${userId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        notify('Account Deleted', data.message || 'User account removed from database.', 'info');
+        notify('Account Deleted', data.message || 'The account has been permanently deleted.', 'info');
         fetchData();
       } else {
         notify('Delete Failed', data.message || 'Cannot delete user account', 'error');
@@ -171,7 +227,7 @@ export default function App() {
       notify('Error', 'Failed to delete user account.', 'error');
     }
   };
-  const handleDeleteReport = async (type, id) => { await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' }); fetchData(); notify('Report Deleted', 'Report removed from database', 'info'); };
+  const handleDeleteReport = async (type, id) => { await fetch(`${API}/api/${type === 'lost' ? 'lost-items' : 'found-items'}/${id}`, { method: 'DELETE' }); fetchData(); notify('Report Deleted', 'The report has been permanently deleted.', 'info'); };
   const handleAddCategory  = async (name) => { await fetch(`${API}/api/categories`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Created', `Category "${name}" added.`, 'success'); };
   const handleUpdateCategory = async (id, name) => { await fetch(`${API}/api/categories/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ CategoryName: name }) }); fetchData(); notify('Category Updated', 'Category changes saved.', 'success'); };
   const handleDeleteCategory = async (id) => {
@@ -212,7 +268,19 @@ export default function App() {
     }
   };
 
-  if (!currentAdmin) return <AdminLoginPage onLogin={handleLogin} />;
+  if (!currentAdmin) return (
+    <>
+      <AdminLoginPage onLogin={handleLogin} />
+      {/* Without this, a failed sign-in sets the message but renders nothing. */}
+      <NotificationModal
+        isOpen={modalNotify.isOpen}
+        onClose={() => setModalNotify(m => ({ ...m, isOpen: false }))}
+        title={modalNotify.title}
+        message={modalNotify.message}
+        type={modalNotify.type}
+      />
+    </>
+  );
 
   const pendingClaims = claims.filter(c => c.Status === 'Pending').length;
 
@@ -242,7 +310,7 @@ export default function App() {
         <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
           {activePage === 'dashboard' && <Dashboard stats={stats} lostItems={lostItems} foundItems={foundItems} claims={claims} categories={categories} locations={locations} />}
           {activePage === 'claims'    && <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} onDeleteClaim={handleDeleteClaim} />}
-          {activePage === 'reports'   && <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} />}
+          {activePage === 'reports'   && <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} onSetApproval={handleSetApproval} />}
           {activePage === 'messages'  && <MessagesPage currentAdmin={currentAdmin} users={users} API={API} onRefresh={fetchData} />}
           {activePage === 'users'     && <UsersPage users={users} onDeleteUser={handleDeleteUser} onCreateAdmin={handleCreateAdmin} onUpdateUserRole={handleUpdateUserRole} />}
           {activePage === 'settings'  && (
