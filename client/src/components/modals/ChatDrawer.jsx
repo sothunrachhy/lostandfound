@@ -3,6 +3,7 @@ import { X, Send, MessageSquare, Users, Search, MapPin, Image as ImageIcon, Exte
 import { getLocationName } from '../../translations';
 import OnlineDot from '../OnlineDot';
 import { compressImage } from './compressImage';
+import { usePolling } from '../../usePolling';
 import { ChatLocationModal } from './ChatLocationModal';
 
 export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, allUsers, onSelectRecipient, onSend, onFetchMessages, onApproveDirect, lang = 'en' }) {
@@ -34,15 +35,11 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
     }
   };
 
-  useEffect(() => {
-    if (isOpen && recipient && onFetchMessages) {
-      onFetchMessages(recipient.UserID);
-      const interval = setInterval(() => {
-        onFetchMessages(recipient.UserID);
-      }, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [isOpen, recipient]);
+  // Polls the open thread, but stops entirely while the tab is hidden.
+  usePolling(
+    () => onFetchMessages && onFetchMessages(recipient.UserID),
+    isOpen && recipient && onFetchMessages ? 2000 : null
+  );
 
   useEffect(() => {
     userScrolledUpRef.current = false;

@@ -10,6 +10,7 @@ import NotificationModal from './components/NotificationModal';
 import AdminProfileModal from './components/AdminProfileModal';
 import ConfirmModal from './components/ConfirmModal';
 import { setToken, clearToken, setUnauthorizedHandler } from './auth';
+import { usePolling } from './usePolling';
 
 let rawAPI = import.meta.env.VITE_API_BASE_URL || 'https://lostandfound-two-lovat.vercel.app';
 if (rawAPI && !rawAPI.startsWith('http://') && !rawAPI.startsWith('https://')) {
@@ -83,11 +84,8 @@ export default function App() {
     });
   }, []);
 
-  React.useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, [currentAdmin]);
+  // Paused while the tab is hidden, never overlapping, backs off on errors.
+  usePolling(fetchData, currentAdmin ? 10000 : null);
 
   React.useEffect(() => {
     if (!currentAdmin) return;

@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import { ReportModal, ClaimModal, ChatDrawer, NotificationsDrawer, ProfileModal, NotificationModal, ItemDetailModal, ConfirmModal } from './components/Modals';
 import { translations } from './translations';
 import { setToken, clearToken, setUnauthorizedHandler } from './auth';
+import { usePolling } from './usePolling';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -104,11 +105,8 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, [currentUser]);
+  // Paused while the tab is hidden, never overlapping, backs off on errors.
+  usePolling(fetchData, currentUser ? 10000 : null);
 
   useEffect(() => {
     if (!currentUser) return;

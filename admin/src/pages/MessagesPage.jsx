@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import OnlineDot from '../components/OnlineDot';
+import { usePolling } from '../usePolling';
 import { MessageSquare, Send, User, Search, CheckCheck, X, Phone, Mail, CreditCard, Image as ImageIcon, MapPin, Navigation, ExternalLink, Check } from 'lucide-react';
 
 const compressImage = (file, maxDimension = 900, quality = 0.75, callback) => {
@@ -225,11 +226,9 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
     }
   };
 
-  useEffect(() => {
-    fetchThread();
-    const interval = setInterval(fetchThread, 2000);
-    return () => clearInterval(interval);
-  }, [selectedUser]);
+  // 2s is aggressive for a chat, so it matters that this stops entirely
+  // while the tab is hidden and resumes the moment it is looked at again.
+  usePolling(fetchThread, selectedUser ? 2000 : null);
 
   useEffect(() => {
     userScrolledUpRef.current = false;
