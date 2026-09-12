@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import OnlineDot from '../components/OnlineDot';
 import ReactDOM from 'react-dom';
 import { Mail, Phone, CreditCard, X, User, Search, Trash2, UserPlus, ShieldCheck, Shield, Key } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
@@ -108,14 +109,17 @@ export default function UsersPage({ users, onDeleteUser, onCreateAdmin, onUpdate
                   >
                     <td className="py-3.5 px-6">
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-2xs border ${
-                          isAdmin ? 'bg-amber-700 text-white border-amber-600' : 'bg-teal-700 text-white border-teal-600'
-                        }`}>
-                          {u.ProfileImage || u.profile_image ? (
-                            <img src={u.ProfileImage || u.profile_image} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            u.Name?.charAt(0).toUpperCase() || 'U'
-                          )}
+                        <div className="relative shrink-0">
+                          <div className={`w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center overflow-hidden shadow-2xs border ${
+                            isAdmin ? 'bg-amber-700 text-white border-amber-600' : 'bg-teal-700 text-white border-teal-600'
+                          }`}>
+                            {u.ProfileImage || u.profile_image ? (
+                              <img src={u.ProfileImage || u.profile_image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              u.Name?.charAt(0).toUpperCase() || 'U'
+                            )}
+                          </div>
+                          <OnlineDot user={u} size="sm" />
                         </div>
                         <span className="font-bold text-slate-900 group-hover:text-teal-700 transition-colors">{u.Name}</span>
                       </div>
@@ -161,7 +165,7 @@ export default function UsersPage({ users, onDeleteUser, onCreateAdmin, onUpdate
                               setConfirmModal({
                                 isOpen: true,
                                 title: 'Delete User Account?',
-                                message: `Permanently delete user account "${u.Name}" (${u.Email}) from database?`,
+                                message: `Permanently delete the account for ${u.Name} (${u.Email})? This cannot be undone.`,
                                 onConfirm: () => onDeleteUser(u.UserID)
                               });
                             }}
@@ -297,14 +301,17 @@ export default function UsersPage({ users, onDeleteUser, onCreateAdmin, onUpdate
             </button>
 
             <div className="flex flex-col items-center text-center space-y-3 pt-2">
-              <div className={`w-20 h-20 rounded-full font-bold text-2xl flex items-center justify-center overflow-hidden shadow-md border-2 ${
-                selectedUser.RoleID === 2 || selectedUser.RoleName === 'Admin' ? 'bg-amber-700 text-white border-amber-600' : 'bg-teal-700 text-white border-teal-600'
-              }`}>
-                {selectedUser.ProfileImage || selectedUser.profile_image ? (
-                  <img src={selectedUser.ProfileImage || selectedUser.profile_image} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span>{selectedUser.Name?.charAt(0).toUpperCase()}</span>
-                )}
+              <div className="relative">
+                <div className={`w-20 h-20 rounded-full font-bold text-2xl flex items-center justify-center overflow-hidden shadow-md border-2 ${
+                  selectedUser.RoleID === 2 || selectedUser.RoleName === 'Admin' ? 'bg-amber-700 text-white border-amber-600' : 'bg-teal-700 text-white border-teal-600'
+                }`}>
+                  {selectedUser.ProfileImage || selectedUser.profile_image ? (
+                    <img src={selectedUser.ProfileImage || selectedUser.profile_image} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{selectedUser.Name?.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <OnlineDot user={selectedUser} size="lg" />
               </div>
               <div>
                 <h3 className="text-lg font-black text-slate-900">{selectedUser.Name}</h3>
@@ -386,7 +393,7 @@ export default function UsersPage({ users, onDeleteUser, onCreateAdmin, onUpdate
                       setConfirmModal({
                         isOpen: true,
                         title: 'Delete User Account?',
-                        message: `Permanently delete user account "${u.Name}" (${u.Email}) from database?`,
+                        message: `Permanently delete the account for ${u.Name} (${u.Email})? This cannot be undone.`,
                         onConfirm: () => onDeleteUser(u.UserID)
                       });
                     }}

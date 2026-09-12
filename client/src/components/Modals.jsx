@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ShieldCheck, Send, Bell, MessageSquare, Upload, Trash2, ChevronDown, Check, CheckCircle2, XCircle, Users, Search, MapPin, Calendar, Tag, MessageCircle, LogOut, AlertCircle, Image as ImageIcon, Navigation, ExternalLink } from 'lucide-react';
 import { translations, getCategoryName, getLocationName } from '../translations';
+import OnlineDot from './OnlineDot';
 
 const compressImage = (file, maxDimension = 1200, quality = 0.8, callback) => {
   const reader = new FileReader();
@@ -430,6 +431,11 @@ export function ChatLocationModal({ isOpen, onClose, onSendLocation, lang = 'en'
 }
 
 export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, allUsers, onSelectRecipient, onSend, onFetchMessages, onApproveDirect, lang = 'en' }) {
+  // `recipient` is a snapshot taken when the chat opened; `allUsers` is
+  // refreshed by polling, so prefer the live record for presence.
+  const liveRecipient =
+    (recipient && allUsers?.find(u => u.UserID === recipient.UserID)) || recipient;
+
   const [text, setText] = useState('');
   const [searchContact, setSearchContact] = useState('');
   const [showContactList, setShowContactList] = useState(false);
@@ -532,7 +538,7 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
                       recipient.Name?.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'U'
                     )}
                   </div>
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                  <OnlineDot user={liveRecipient} size="sm" />
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-sm font-extrabold text-slate-900 truncate leading-snug">{recipient.Name}</h4>
@@ -601,12 +607,7 @@ export function ChatDrawer({ isOpen, onClose, messages, currentUser, recipient, 
                           u.Name?.charAt(0).toUpperCase()
                         )}
                       </div>
-                      <span
-                        className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white shadow-xs ${
-                          u.isOnline || u.IsOnline || u.RoleID === 2 ? 'bg-emerald-500' : 'bg-slate-300'
-                        }`}
-                        title={u.isOnline || u.IsOnline || u.RoleID === 2 ? 'Online' : 'Offline'}
-                      />
+                      <OnlineDot user={u} />
                     </div>
                     <span className={`text-[10px] truncate max-w-[64px] font-medium ${isSelected ? 'text-teal-800 font-bold' : 'text-slate-600'}`}>
                       {u.Name?.split(' ')[0]}

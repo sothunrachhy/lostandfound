@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import OnlineDot from '../components/OnlineDot';
 import { MessageSquare, Send, User, Search, CheckCheck, X, Phone, Mail, CreditCard, Shield, Image as ImageIcon, MapPin, Navigation, ExternalLink, Check } from 'lucide-react';
 
 const compressImage = (file, maxDimension = 900, quality = 0.75, callback) => {
@@ -337,11 +338,7 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
                       alt=""
                       className="w-9 h-9 rounded-full object-cover border border-slate-200"
                     />
-                    <span
-                      className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${
-                        u.isOnline || u.IsOnline ? 'bg-emerald-500' : 'bg-slate-300'
-                      }`}
-                    />
+                    <OnlineDot user={u} size="sm" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
@@ -375,11 +372,14 @@ export default function MessagesPage({ currentAdmin, users, API, onRefresh }) {
                 className="flex items-center gap-3 cursor-pointer group"
                 title="Click to view full user profile"
               >
-                <img
-                  src={selectedUser.ProfileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.Name)}`}
-                  alt=""
-                  className="w-10 h-10 rounded-full object-cover border-2 border-teal-600 group-hover:border-teal-700 transition-all shadow-sm"
-                />
+                <div className="relative shrink-0">
+                  <img
+                    src={selectedUser.ProfileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.Name)}`}
+                    alt=""
+                    className="w-10 h-10 rounded-full object-cover border-2 border-teal-600 group-hover:border-teal-700 transition-all shadow-sm"
+                  />
+                  <OnlineDot user={selectedUser} />
+                </div>
                 <div>
                   <h4 className="text-sm font-black text-slate-800 group-hover:text-teal-700 transition-colors flex items-center gap-1.5">
                     {selectedUser.Name}
