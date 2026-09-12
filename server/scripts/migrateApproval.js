@@ -8,10 +8,10 @@
  * Safe to re-run: the backfill only touches tables where the column was just
  * created, so it will not re-approve a genuinely pending queue.
  *
- *   node server/migrateApproval.js
+ *   node server/scripts/migrateApproval.js
  */
 require('dotenv').config();
-const pool = require('./db');
+const pool = require('../db');
 
 const TABLES = ['lost_items', 'found_items'];
 

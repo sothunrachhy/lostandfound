@@ -4,11 +4,11 @@
  * Safe to run more than once — rows that are already hashed are skipped, so
  * re-running it will not double-hash anyone out of their account.
  *
- *   node server/hashPasswords.js
+ *   node server/scripts/hashPasswords.js
  */
 require('dotenv').config();
-const pool = require('./db');
-const { hashPassword, isHashed } = require('./auth');
+const pool = require('../db');
+const { hashPassword, isHashed } = require('../auth');
 
 (async () => {
   const client = await pool.connect();

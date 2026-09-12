@@ -16,7 +16,11 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:setup": "node server/scripts/setup.js",
+    "db:hash-passwords": "node server/scripts/hashPasswords.js",
+    "db:migrate-approval": "node server/scripts/migrateApproval.js",
+    "db:reset-password": "node server/scripts/resetPassword.js"
   },
   "keywords": [],
   "author": "",

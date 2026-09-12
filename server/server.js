@@ -3,7 +3,7 @@ const express = require('express');
 const cors    = require('cors');
 const pool    = require('./db');
 const { getAllMatches } = require('./matching');
-const { uploadToB2 }   = require('./b2Service');
+const { uploadImage }  = require('./storage');
 const {
   hashPassword, verifyPassword, signToken, requireAuth, requireAdmin
 } = require('./auth');
@@ -77,7 +77,7 @@ app.post(['/api/auth/register', '/auth/register'], async (req, res) => {
     const sid     = studentID || `STU-${Date.now().toString().slice(-6)}`;
     let avatar = profileImage || '';
     if (avatar && !avatar.startsWith('http')) {
-      avatar = await uploadToB2(avatar);
+      avatar = await uploadImage(avatar);
     }
 
     const { rows } = await q(
@@ -106,7 +106,7 @@ app.post(['/api/admin/users', '/admin/users'], requireAdmin, async (req, res) =>
     const role = parseInt(roleID) === 2 ? 2 : 1;
     const sid  = studentID || `STU-${Date.now().toString().slice(-6)}`;
     let avatar = profileImage || '';
-    if (avatar && !avatar.startsWith('http')) avatar = await uploadToB2(avatar);
+    if (avatar && !avatar.startsWith('http')) avatar = await uploadImage(avatar);
 
     const { rows } = await q(
       `INSERT INTO users (student_id, name, email, phone, password, role_id, profile_image)
@@ -135,7 +135,7 @@ app.put(['/api/users/profile', '/users/profile'], requireAuth, async (req, res) 
   try {
     let avatar = ProfileImage || '';
     if (avatar && !avatar.startsWith('http')) {
-      avatar = await uploadToB2(avatar);
+      avatar = await uploadImage(avatar);
     }
 
     const { rows } = await q(
@@ -334,7 +334,7 @@ app.post(['/api/lost-items', '/lost-items'], requireAuth, async (req, res) => {
   if (!UserID || !ItemName || !CategoryID || !LocationID)
     return res.status(400).json({ success: false, message: 'Required fields missing' });
   try {
-    const imageUrl = (await uploadToB2(Image)) || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
+    const imageUrl = (await uploadImage(Image)) || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
     const { rows } = await q(
       `INSERT INTO lost_items (user_id, category_id, location_id, item_name, brand, color, description, date_lost, image)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -419,7 +419,7 @@ app.post(['/api/found-items', '/found-items'], requireAuth, async (req, res) => 
   if (!UserID || !ItemName || !CategoryID || !LocationID)
     return res.status(400).json({ success: false, message: 'Required fields missing' });
   try {
-    const imageUrl = (await uploadToB2(Image)) || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
+    const imageUrl = (await uploadImage(Image)) || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=600';
     const { rows } = await q(
       `INSERT INTO found_items (user_id, category_id, location_id, item_name, brand, color, description, date_found, image)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)

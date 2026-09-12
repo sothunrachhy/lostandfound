@@ -1,6 +1,6 @@
 require('dotenv').config();
-const pool = require('./db');
-const { hashPassword } = require('./auth');
+const pool = require('../db');
+const { hashPassword } = require('../auth');
 
 async function setup() {
   const client = await pool.connect();

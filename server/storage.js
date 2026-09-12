@@ -2,10 +2,13 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const crypto = require('crypto');
 
 /**
- * Uploads image (base64 string) to Backblaze B2 and returns the public Cloudflare CDN URL.
- * Falls back to base64 string if B2 credentials are not configured yet.
+ * Uploads a base64 image and returns its public URL.
+ *
+ * Primary target is Cloudflare R2; Backblaze B2 is used as a fallback when
+ * only B2 credentials are configured. If neither is set up, the base64 string
+ * is returned unchanged so the app keeps working in development.
  */
-async function uploadToB2(imageData) {
+async function uploadImage(imageData) {
   if (!imageData || typeof imageData !== 'string') return imageData;
 
   // Cloudflare R2 Credentials
@@ -91,4 +94,4 @@ async function uploadToB2(imageData) {
   }
 }
 
-module.exports = { uploadToB2 };
+module.exports = { uploadImage };

@@ -4,19 +4,19 @@
  * Because passwords are hashed they cannot be read back, so this is the
  * supported way to restore access to an account whose password was forgotten.
  *
- *   node server/resetPassword.js <email> <newPassword>
+ *   node server/scripts/resetPassword.js <email> <newPassword>
  *
  * Example:
- *   node server/resetPassword.js someone@gmail.com student123
+ *   node server/scripts/resetPassword.js someone@gmail.com student123
  */
 require('dotenv').config();
-const pool = require('./db');
-const { hashPassword, isHashed } = require('./auth');
+const pool = require('../db');
+const { hashPassword, isHashed } = require('../auth');
 
 const [, , email, newPassword] = process.argv;
 
 if (!email || !newPassword) {
-  console.error('Usage: node server/resetPassword.js <email> <newPassword>');
+  console.error('Usage: node server/scripts/resetPassword.js <email> <newPassword>');
   process.exit(1);
 }
 
