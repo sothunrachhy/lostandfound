@@ -34,7 +34,7 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
           {navItems.map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setActivePage(id)}
               className={`nav-item w-full text-left ${activePage === id ? 'nav-item-active' : ''}`}>
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className="w-[18px] h-[18px] shrink-0" />
               <span className="flex-1">{label}</span>
               {id === 'claims' && pendingClaims > 0 && (
                 <span className="bg-amber-400 text-slate-900 text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0">

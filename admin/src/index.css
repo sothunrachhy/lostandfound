@@ -153,7 +153,7 @@
 .nav-item {
   display: flex; align-items: center; gap: .75rem;
   padding: .6rem .85rem; border-radius: .75rem;
-  font-size: .8125rem; font-weight: 600; cursor: pointer;
+  font-size: .875rem; font-weight: 600; cursor: pointer;
   transition: all .18s ease; color: #64748b;
   text-decoration: none;
 }
