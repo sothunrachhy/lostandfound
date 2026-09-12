@@ -1,5 +1,6 @@
 require('dotenv').config();
 const pool = require('./db');
+const { hashPassword } = require('./auth');
 
 async function setup() {
   const client = await pool.connect();
@@ -46,6 +47,7 @@ async function setup() {
         date_lost    DATE,
         image        TEXT,
         status       VARCHAR(50) DEFAULT 'Lost',
+        approval_status VARCHAR(20) NOT NULL DEFAULT 'Pending',
         created_at   TIMESTAMPTZ DEFAULT NOW()
       );
 
@@ -61,6 +63,7 @@ async function setup() {
         date_found   DATE,
         image        TEXT,
         status       VARCHAR(50) DEFAULT 'Available',
+        approval_status VARCHAR(20) NOT NULL DEFAULT 'Pending',
         created_at   TIMESTAMPTZ DEFAULT NOW()
       );
 
@@ -138,10 +141,11 @@ async function setup() {
     `);
 
     // Admin User
-    await client.query(`
-      INSERT INTO users (student_id, name, email, phone, password, role_id, profile_image) VALUES
-        ('ADM-2024-0001', 'Ah Mab', 'admin123@gmail.com', '+855 12 345 678', '88887777', 2, '')
-    `);
+    await client.query(
+      `INSERT INTO users (student_id, name, email, phone, password, role_id, profile_image)
+       VALUES ('ADM-2024-0001', 'Ah Mab', 'admin123@gmail.com', '+855 12 345 678', $1, 2, '')`,
+      [await hashPassword('88887777')]
+    );
 
     console.log('✅ Initial setup complete.');
   } finally {

@@ -12,7 +12,7 @@
     "dev:admin": "npm run dev --prefix admin",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\"",
     "start": "node server/server.js",
-    "test": "echo \"No tests specified\" && exit 1"
+    "test": "node --test \"tests/**/*.test.js\""
   },
   "keywords": [],
   "author": "",
@@ -20,9 +20,11 @@
   "type": "commonjs",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1103.0",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.27.0",
     "pg": "^8.22.0",
     "react": "^19.2.8",

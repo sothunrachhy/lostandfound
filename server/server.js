@@ -4,6 +4,9 @@ const cors    = require('cors');
 const pool    = require('./db');
 const { getAllMatches } = require('./matching');
 const { uploadToB2 }   = require('./b2Service');
+const {
+  hashPassword, verifyPassword, signToken, requireAuth, requireAdmin
+} = require('./auth');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -45,13 +48,18 @@ app.post(['/api/auth/login', '/auth/login'], async (req, res) => {
        WHERE LOWER(u.email) = LOWER($1)`,
       [email]
     );
-    const user = rows[0];
-    if (!user || user.password !== password)
+    const user  = rows[0];
+    const check = user ? await verifyPassword(password, user.password) : { ok: false };
+    if (!check.ok)
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
+
+    // Legacy plaintext row: now that the password is known-good, re-store it hashed.
+    if (check.needsUpgrade)
+      await q('UPDATE users SET password=$1 WHERE user_id=$2', [await hashPassword(password), user.user_id]);
 
     await q('UPDATE users SET last_active=NOW() WHERE user_id=$1', [user.user_id]);
     user.is_online = true;
-    res.json({ success: true, user: sanitizeUser(user) });
+    res.json({ success: true, token: signToken(user), user: sanitizeUser(user) });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
@@ -61,7 +69,9 @@ app.post(['/api/auth/register', '/auth/register'], async (req, res) => {
     return res.status(400).json({ success: false, message: 'Name, email and password required' });
 
   try {
-    const role    = parseInt(roleID) === 2 ? 2 : 1;
+    // Public registration is always a plain user — an attacker must not be able
+    // to mint an admin by posting roleID:2. Admins are created via POST /api/admin/users.
+    const role    = 1;
     const sid     = studentID || `STU-${Date.now().toString().slice(-6)}`;
     let avatar = profileImage || '';
     if (avatar && !avatar.startsWith('http')) {
@@ -72,19 +82,48 @@ app.post(['/api/auth/register', '/auth/register'], async (req, res) => {
       `INSERT INTO users (student_id, name, email, phone, password, role_id, profile_image)
        VALUES ($1,$2,$3,$4,$5,$6,$7)
        RETURNING user_id, student_id, name, email, phone, role_id, profile_image`,
-      [sid, name, email, phone || '', password, role, avatar]
+      [sid, name, email, phone || '', await hashPassword(password), role, avatar]
     );
     const user = rows[0];
     user.role_name = role === 2 ? 'Admin' : 'User';
-    res.json({ success: true, message: 'Registration successful!', user: sanitizeUser(user) });
+    res.json({ success: true, message: 'Registration successful!', token: signToken(user), user: sanitizeUser(user) });
   } catch (e) {
     if (e.code === '23505') return res.status(400).json({ success: false, message: 'Email already registered' });
     res.status(500).json({ message: e.message });
   }
 });
 
-app.put(['/api/users/profile', '/users/profile'], async (req, res) => {
-  const UserID = req.body.UserID || req.body.userId || req.body.user_id;
+// Creating an admin is a privileged action, so it lives behind requireAdmin
+// rather than on the public registration route.
+app.post(['/api/admin/users', '/admin/users'], requireAdmin, async (req, res) => {
+  const { name, email, password, phone, studentID, roleID, profileImage } = req.body;
+  if (!name || !email || !password)
+    return res.status(400).json({ success: false, message: 'Name, email and password required' });
+
+  try {
+    const role = parseInt(roleID) === 2 ? 2 : 1;
+    const sid  = studentID || `STU-${Date.now().toString().slice(-6)}`;
+    let avatar = profileImage || '';
+    if (avatar && !avatar.startsWith('http')) avatar = await uploadToB2(avatar);
+
+    const { rows } = await q(
+      `INSERT INTO users (student_id, name, email, phone, password, role_id, profile_image)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       RETURNING user_id, student_id, name, email, phone, role_id, profile_image`,
+      [sid, name, email, phone || '', await hashPassword(password), role, avatar]
+    );
+    const user = rows[0];
+    user.role_name = role === 2 ? 'Admin' : 'User';
+    res.json({ success: true, message: 'Account created', user: sanitizeUser(user) });
+  } catch (e) {
+    if (e.code === '23505') return res.status(400).json({ success: false, message: 'Email already registered' });
+    res.status(500).json({ message: e.message });
+  }
+});
+
+app.put(['/api/users/profile', '/users/profile'], requireAuth, async (req, res) => {
+  // Never trust an id from the body — a caller could edit someone else's profile.
+  const UserID = req.user.UserID;
   const Name = req.body.Name || req.body.name;
   const Phone = req.body.Phone || req.body.phone || '';
   const StudentID = req.body.StudentID || req.body.studentId || req.body.student_id || '';
@@ -99,7 +138,9 @@ app.put(['/api/users/profile', '/users/profile'], async (req, res) => {
 
     const { rows } = await q(
       `UPDATE users
-       SET name = $1, phone = $2, student_id = $3, profile_image = COALESCE(NULLIF($4, ''), profile_image)
+       SET name = $1, phone = $2,
+           student_id    = COALESCE(NULLIF($3, ''), student_id),
+           profile_image = COALESCE(NULLIF($4, ''), profile_image)
        WHERE user_id = $5
        RETURNING user_id, student_id, name, email, phone, role_id, profile_image`,
       [Name, Phone, StudentID, avatar, UserID]
@@ -111,7 +152,7 @@ app.put(['/api/users/profile', '/users/profile'], async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.get(['/api/users', '/users'], async (_req, res) => {
+app.get(['/api/users', '/users'], requireAuth, async (_req, res) => {
   try {
     const { rows } = await q(
       `SELECT u.user_id, u.student_id, u.name, u.email, u.phone, u.profile_image, u.last_active,
@@ -125,9 +166,8 @@ app.get(['/api/users', '/users'], async (_req, res) => {
   }
 });
 
-app.post(['/api/users/heartbeat', '/users/heartbeat'], async (req, res) => {
-  const userId = req.body.userId || req.body.UserID || req.body.user_id;
-  if (!userId) return res.json({ success: false, message: 'No userId provided' });
+app.post(['/api/users/heartbeat', '/users/heartbeat'], requireAuth, async (req, res) => {
+  const userId = req.user.UserID;
   try {
     await q('UPDATE users SET last_active=NOW() WHERE user_id=$1', [userId]);
     res.json({ success: true });
@@ -136,7 +176,7 @@ app.post(['/api/users/heartbeat', '/users/heartbeat'], async (req, res) => {
   }
 });
 
-app.put(['/api/users/:id/role', '/users/:id/role'], async (req, res) => {
+app.put(['/api/users/:id/role', '/users/:id/role'], requireAdmin, async (req, res) => {
   const userId = req.params.id;
   const roleId = parseInt(req.body.roleID || req.body.role_id) === 2 ? 2 : 1;
   try {
@@ -152,7 +192,7 @@ app.put(['/api/users/:id/role', '/users/:id/role'], async (req, res) => {
   }
 });
 
-app.delete(['/api/users/:id', '/users/:id'], async (req, res) => {
+app.delete(['/api/users/:id', '/users/:id'], requireAdmin, async (req, res) => {
   const userId = req.params.id;
   try {
     await q('DELETE FROM notifications WHERE user_id=$1', [userId]);
@@ -173,12 +213,12 @@ app.delete(['/api/users/:id', '/users/:id'], async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // CATEGORIES & LOCATIONS
 // ══════════════════════════════════════════════════════════════════
-app.get(['/api/categories', '/categories'], async (_req, res) => {
+app.get(['/api/categories', '/categories'], requireAuth, async (_req, res) => {
   const { rows } = await q('SELECT category_id AS "CategoryID", category_name AS "CategoryName" FROM categories ORDER BY category_id');
   res.json(rows);
 });
 
-app.post(['/api/categories', '/categories'], async (req, res) => {
+app.post(['/api/categories', '/categories'], requireAdmin, async (req, res) => {
   const { CategoryName } = req.body;
   if (!CategoryName) return res.status(400).json({ message: 'Category name required' });
   const { rows } = await q(
@@ -188,7 +228,7 @@ app.post(['/api/categories', '/categories'], async (req, res) => {
   res.json({ success: true, category: rows[0] });
 });
 
-app.put(['/api/categories/:id', '/categories/:id'], async (req, res) => {
+app.put(['/api/categories/:id', '/categories/:id'], requireAdmin, async (req, res) => {
   const { CategoryName } = req.body;
   if (!CategoryName) return res.status(400).json({ message: 'Category name required' });
   try {
@@ -197,19 +237,19 @@ app.put(['/api/categories/:id', '/categories/:id'], async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete(['/api/categories/:id', '/categories/:id'], async (req, res) => {
+app.delete(['/api/categories/:id', '/categories/:id'], requireAdmin, async (req, res) => {
   try {
     await q('DELETE FROM categories WHERE category_id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ message: 'Cannot delete category that is currently assigned to reported items' }); }
 });
 
-app.get(['/api/locations', '/locations'], async (_req, res) => {
+app.get(['/api/locations', '/locations'], requireAuth, async (_req, res) => {
   const { rows } = await q('SELECT location_id AS "LocationID", location_name AS "LocationName" FROM locations ORDER BY location_id');
   res.json(rows);
 });
 
-app.post(['/api/locations', '/locations'], async (req, res) => {
+app.post(['/api/locations', '/locations'], requireAdmin, async (req, res) => {
   const { LocationName } = req.body;
   if (!LocationName) return res.status(400).json({ message: 'Location name required' });
   const { rows } = await q(
@@ -219,7 +259,7 @@ app.post(['/api/locations', '/locations'], async (req, res) => {
   res.json({ success: true, location: rows[0] });
 });
 
-app.put(['/api/locations/:id', '/locations/:id'], async (req, res) => {
+app.put(['/api/locations/:id', '/locations/:id'], requireAdmin, async (req, res) => {
   const { LocationName } = req.body;
   if (!LocationName) return res.status(400).json({ message: 'Location name required' });
   try {
@@ -228,7 +268,7 @@ app.put(['/api/locations/:id', '/locations/:id'], async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete(['/api/locations/:id', '/locations/:id'], async (req, res) => {
+app.delete(['/api/locations/:id', '/locations/:id'], requireAdmin, async (req, res) => {
   try {
     await q('DELETE FROM locations WHERE location_id = $1', [req.params.id]);
     res.json({ success: true });
@@ -246,6 +286,7 @@ const LOST_SELECT = `
          TO_CHAR(l.date_lost, 'YYYY-MM-DD') AS "DateLost",
          TO_CHAR(l.created_at, 'HH12:MI AM') AS "ReportTime",
          l.image AS "Image", l.status AS "Status",
+         l.approval_status AS "ApprovalStatus",
          l.created_at AS "CreatedAt",
          c.category_name AS "CategoryName",
          loc.location_name AS "LocationName",
@@ -256,7 +297,7 @@ const LOST_SELECT = `
   JOIN users      u   ON u.user_id       = l.user_id
 `;
 
-app.get(['/api/lost-items', '/lost-items'], async (req, res) => {
+app.get(['/api/lost-items', '/lost-items'], requireAuth, async (req, res) => {
   try {
     const { search, categoryId, locationId, status } = req.query;
     let sql    = LOST_SELECT + ' WHERE 1=1';
@@ -267,13 +308,26 @@ app.get(['/api/lost-items', '/lost-items'], async (req, res) => {
     if (locationId) { vals.push(locationId);         sql += ` AND l.location_id = $${vals.length}`; }
     if (status)     { vals.push(status);             sql += ` AND LOWER(l.status) = LOWER($${vals.length})`; }
 
+    // Only approved reports are public. Admins may ask for the moderation
+    // queue; everyone else additionally sees their own pending submissions
+    // so they can tell the report went through.
+    const { approval } = req.query;
+    if (req.user.RoleID === 2 && approval) {
+      if (approval !== 'all') { vals.push(approval); sql += ` AND l.approval_status = $${vals.length}`; }
+    } else if (req.user.RoleID === 2) {
+      sql += ` AND l.approval_status = 'Approved'`;
+    } else {
+      vals.push(req.user.UserID);
+      sql += ` AND (l.approval_status = 'Approved' OR l.user_id = $${vals.length})`;
+    }
+
     sql += ' ORDER BY l.created_at DESC';
     const { rows } = await q(sql, vals);
     res.json(rows);
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post(['/api/lost-items', '/lost-items'], async (req, res) => {
+app.post(['/api/lost-items', '/lost-items'], requireAuth, async (req, res) => {
   const { UserID, CategoryID, LocationID, ItemName, Brand, Color, Description, DateLost, Image } = req.body;
   if (!UserID || !ItemName || !CategoryID || !LocationID)
     return res.status(400).json({ success: false, message: 'Required fields missing' });
@@ -287,16 +341,23 @@ app.post(['/api/lost-items', '/lost-items'], async (req, res) => {
        DateLost || new Date().toISOString().split('T')[0], imageUrl]
     );
 
-    // Auto-match notifications
-    await autoMatchNotify('lost', rows[0].LostID, UserID);
-
-    res.json({ success: true, message: 'Lost item reported!', lostItem: rows[0] });
+    // Matching waits until an admin approves the report.
+    res.json({ success: true, pending: true, message: 'Report submitted for admin review.', lostItem: rows[0] });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete(['/api/lost-items/:id', '/lost-items/:id'], async (req, res) => {
-  await q('DELETE FROM lost_items WHERE lost_id = $1', [req.params.id]);
-  res.json({ success: true });
+app.delete(['/api/lost-items/:id', '/lost-items/:id'], requireAuth, async (req, res) => {
+  try {
+    // Ownership is enforced inside the statement so there is no gap between
+    // checking who owns the row and deleting it.
+    const { rowCount } = await q(
+      'DELETE FROM lost_items WHERE lost_id = $1 AND ($2::boolean OR user_id = $3)',
+      [req.params.id, req.user.RoleID === 2, req.user.UserID]
+    );
+    if (rowCount === 0)
+      return res.status(404).json({ success: false, message: 'Report not found, or it is not yours to delete.' });
+    res.json({ success: true, message: 'Report deleted' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -310,6 +371,7 @@ const FOUND_SELECT = `
          TO_CHAR(f.date_found, 'YYYY-MM-DD') AS "DateFound",
          TO_CHAR(f.created_at, 'HH12:MI AM') AS "ReportTime",
          f.image AS "Image", f.status AS "Status",
+         f.approval_status AS "ApprovalStatus",
          f.created_at AS "CreatedAt",
          c.category_name AS "CategoryName",
          loc.location_name AS "LocationName",
@@ -320,7 +382,7 @@ const FOUND_SELECT = `
   JOIN users      u   ON u.user_id       = f.user_id
 `;
 
-app.get(['/api/found-items', '/found-items'], async (req, res) => {
+app.get(['/api/found-items', '/found-items'], requireAuth, async (req, res) => {
   try {
     const { search, categoryId, locationId, status } = req.query;
     let sql    = FOUND_SELECT + ' WHERE 1=1';
@@ -331,13 +393,26 @@ app.get(['/api/found-items', '/found-items'], async (req, res) => {
     if (locationId) { vals.push(locationId);         sql += ` AND f.location_id = $${vals.length}`; }
     if (status)     { vals.push(status);             sql += ` AND LOWER(f.status) = LOWER($${vals.length})`; }
 
+    // Only approved reports are public. Admins may ask for the moderation
+    // queue; everyone else additionally sees their own pending submissions
+    // so they can tell the report went through.
+    const { approval } = req.query;
+    if (req.user.RoleID === 2 && approval) {
+      if (approval !== 'all') { vals.push(approval); sql += ` AND f.approval_status = $${vals.length}`; }
+    } else if (req.user.RoleID === 2) {
+      sql += ` AND f.approval_status = 'Approved'`;
+    } else {
+      vals.push(req.user.UserID);
+      sql += ` AND (f.approval_status = 'Approved' OR f.user_id = $${vals.length})`;
+    }
+
     sql += ' ORDER BY f.created_at DESC';
     const { rows } = await q(sql, vals);
     res.json(rows);
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post(['/api/found-items', '/found-items'], async (req, res) => {
+app.post(['/api/found-items', '/found-items'], requireAuth, async (req, res) => {
   const { UserID, CategoryID, LocationID, ItemName, Brand, Color, Description, DateFound, Image } = req.body;
   if (!UserID || !ItemName || !CategoryID || !LocationID)
     return res.status(400).json({ success: false, message: 'Required fields missing' });
@@ -351,20 +426,33 @@ app.post(['/api/found-items', '/found-items'], async (req, res) => {
        DateFound || new Date().toISOString().split('T')[0], imageUrl]
     );
 
-    await autoMatchNotify('found', rows[0].FoundID, UserID);
-    res.json({ success: true, message: 'Found item reported!', foundItem: rows[0] });
+    // Matching waits until an admin approves the report.
+    res.json({ success: true, pending: true, message: 'Report submitted for admin review.', foundItem: rows[0] });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete(['/api/found-items/:id', '/found-items/:id'], async (req, res) => {
-  await q(`DELETE FROM found_items WHERE found_id=$1`, [req.params.id]);
-  res.json({ success: true, message: 'Item deleted' });
+app.delete(['/api/found-items/:id', '/found-items/:id'], requireAuth, async (req, res) => {
+  try {
+    const { rowCount } = await q(
+      'DELETE FROM found_items WHERE found_id = $1 AND ($2::boolean OR user_id = $3)',
+      [req.params.id, req.user.RoleID === 2, req.user.UserID]
+    );
+    if (rowCount === 0)
+      return res.status(404).json({ success: false, message: 'Report not found, or it is not yours to delete.' });
+    res.json({ success: true, message: 'Item deleted' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.put(['/api/found-items/:id/status', '/found-items/:id/status'], async (req, res) => {
+app.put(['/api/found-items/:id/status', '/found-items/:id/status'], requireAuth, async (req, res) => {
   const { status } = req.body;
   try {
-    await q(`UPDATE found_items SET status=$1 WHERE found_id=$2`, [status || 'Claimed', req.params.id]);
+    // Only the person who turned the item in (or an admin) may change its status.
+    const { rowCount } = await q(
+      'UPDATE found_items SET status=$1 WHERE found_id=$2 AND ($3::boolean OR user_id = $4)',
+      [status || 'Claimed', req.params.id, req.user.RoleID === 2, req.user.UserID]
+    );
+    if (rowCount === 0)
+      return res.status(404).json({ success: false, message: 'Item not found, or it is not yours to update.' });
     res.json({ success: true, message: `Item status updated to ${status || 'Claimed'}` });
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -374,11 +462,53 @@ app.put(['/api/found-items/:id/status', '/found-items/:id/status'], async (req, 
 // ══════════════════════════════════════════════════════════════════
 // MATCHING ENGINE
 // ══════════════════════════════════════════════════════════════════
-app.get(['/api/matches', '/matches'], async (_req, res) => {
+// ══════════════════════════════════════════════════════════════════
+// REPORT MODERATION  — reports stay hidden until an admin approves them
+// ══════════════════════════════════════════════════════════════════
+const APPROVAL_TARGETS = {
+  lost:  { table: 'lost_items',  idCol: 'lost_id',  label: 'lost' },
+  found: { table: 'found_items', idCol: 'found_id', label: 'found' }
+};
+
+async function setApproval(kind, req, res) {
+  const { table, idCol, label } = APPROVAL_TARGETS[kind];
+  const approval = req.body.approval || req.body.Approval;
+
+  if (!['Approved', 'Rejected'].includes(approval))
+    return res.status(400).json({ success: false, message: "approval must be 'Approved' or 'Rejected'" });
+
+  try {
+    const { rows } = await q(
+      `UPDATE ${table} SET approval_status = $1 WHERE ${idCol} = $2
+       RETURNING ${idCol} AS id, user_id, item_name, approval_status`,
+      [approval, req.params.id]
+    );
+    if (rows.length === 0)
+      return res.status(404).json({ success: false, message: 'Report not found' });
+
+    const row = rows[0];
+    const message = approval === 'Approved'
+      ? `Your ${label} report "${row.item_name}" was approved and is now visible on the campus board.`
+      : `Your ${label} report "${row.item_name}" was not approved by an administrator.`;
+
+    await q(`INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Report')`,
+      [row.user_id, message]);
+
+    // Only now does the report take part in matching.
+    if (approval === 'Approved') await autoMatchNotify(kind, row.id, row.user_id);
+
+    res.json({ success: true, message: `Report ${approval.toLowerCase()}.`, approvalStatus: row.approval_status });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+}
+
+app.put(['/api/lost-items/:id/approval',  '/lost-items/:id/approval'],  requireAdmin, (req, res) => setApproval('lost',  req, res));
+app.put(['/api/found-items/:id/approval', '/found-items/:id/approval'], requireAdmin, (req, res) => setApproval('found', req, res));
+
+app.get(['/api/matches', '/matches'], requireAuth, async (_req, res) => {
   try {
     const [lostRes, foundRes] = await Promise.all([
-      q(LOST_SELECT  + " WHERE l.status = 'Lost' ORDER BY l.created_at DESC"),
-      q(FOUND_SELECT + " WHERE f.status = 'Available' ORDER BY f.created_at DESC")
+      q(LOST_SELECT  + " WHERE l.status = 'Lost'      AND l.approval_status = 'Approved' ORDER BY l.created_at DESC"),
+      q(FOUND_SELECT + " WHERE f.status = 'Available' AND f.approval_status = 'Approved' ORDER BY f.created_at DESC")
     ]);
     const matches = getAllMatches(lostRes.rows, foundRes.rows);
     res.json(matches);
@@ -388,7 +518,7 @@ app.get(['/api/matches', '/matches'], async (_req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // CLAIMS
 // ══════════════════════════════════════════════════════════════════
-app.get(['/api/claims', '/claims'], async (_req, res) => {
+app.get(['/api/claims', '/claims'], requireAdmin, async (_req, res) => {
   try {
     const { rows } = await q(`
       SELECT cl.claim_id AS "ClaimID", cl.lost_id AS "LostID", cl.found_id AS "FoundID",
@@ -412,7 +542,7 @@ app.get(['/api/claims', '/claims'], async (_req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.post(['/api/claims', '/claims'], async (req, res) => {
+app.post(['/api/claims', '/claims'], requireAuth, async (req, res) => {
   const { LostID, FoundID, OwnerID, FinderID, Proof, ContactInfo } = req.body;
   if (!FoundID || !OwnerID || !Proof)
     return res.status(400).json({ success: false, message: 'FoundID, OwnerID, and Proof are required' });
@@ -436,7 +566,7 @@ app.post(['/api/claims', '/claims'], async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.put(['/api/claims/:id/status', '/claims/:id/status'], async (req, res) => {
+app.put(['/api/claims/:id/status', '/claims/:id/status'], requireAdmin, async (req, res) => {
   const { status, adminNotes } = req.body;
   const claimId = req.params.id;
   try {
@@ -463,7 +593,7 @@ app.put(['/api/claims/:id/status', '/claims/:id/status'], async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.delete(['/api/claims/:id', '/claims/:id'], async (req, res) => {
+app.delete(['/api/claims/:id', '/claims/:id'], requireAdmin, async (req, res) => {
   const claimId = req.params.id;
   try {
     const { rows } = await q(`DELETE FROM claims WHERE claim_id=$1 RETURNING claim_id`, [claimId]);
@@ -474,11 +604,18 @@ app.delete(['/api/claims/:id', '/claims/:id'], async (req, res) => {
   }
 });
 
-app.post(['/api/claims/approve-direct', '/claims/approve-direct'], async (req, res) => {
-  const { foundId, finderId, ownerId } = req.body;
+app.post(['/api/claims/approve-direct', '/claims/approve-direct'], requireAuth, async (req, res) => {
+  const { foundId, ownerId } = req.body;
   try {
     if (foundId) {
-      await q(`UPDATE found_items SET status='Claimed' WHERE found_id=$1`, [foundId]);
+      // finderId used to be taken from the body, so anyone could mark any item
+      // returned. Authority comes from the token instead.
+      const { rowCount } = await q(
+        "UPDATE found_items SET status='Claimed' WHERE found_id=$1 AND ($2::boolean OR user_id = $3)",
+        [foundId, req.user.RoleID === 2, req.user.UserID]
+      );
+      if (rowCount === 0)
+        return res.status(403).json({ success: false, message: 'Only the person who found this item can mark it returned.' });
     }
     if (foundId && ownerId) {
       await q(`UPDATE claims SET status='Approved' WHERE found_id=$1 AND owner_id=$2`, [foundId, ownerId]);
@@ -496,8 +633,9 @@ app.post(['/api/claims/approve-direct', '/claims/approve-direct'], async (req, r
 // ══════════════════════════════════════════════════════════════════
 // NOTIFICATIONS
 // ══════════════════════════════════════════════════════════════════
-app.get(['/api/notifications', '/notifications'], async (req, res) => {
-  const { userId } = req.query;
+app.get(['/api/notifications', '/notifications'], requireAuth, async (req, res) => {
+  // Admins may inspect any inbox; everyone else is pinned to their own.
+  const userId = req.user.RoleID === 2 ? (req.query.userId || req.user.UserID) : req.user.UserID;
   const sql = userId
     ? `SELECT notification_id AS "NotificationID", user_id AS "UserID", message AS "Message",
               type AS "Type", status AS "Status", created_at AS "Date"
@@ -509,16 +647,24 @@ app.get(['/api/notifications', '/notifications'], async (req, res) => {
   res.json(rows);
 });
 
-app.put(['/api/notifications/:id/read', '/notifications/:id/read'], async (req, res) => {
-  await q(`UPDATE notifications SET status='Read' WHERE notification_id=$1`, [req.params.id]);
+app.put(['/api/notifications/:id/read', '/notifications/:id/read'], requireAuth, async (req, res) => {
+  const { rowCount } = await q(
+    "UPDATE notifications SET status='Read' WHERE notification_id=$1 AND ($2::boolean OR user_id = $3)",
+    [req.params.id, req.user.RoleID === 2, req.user.UserID]
+  );
+  if (rowCount === 0)
+    return res.status(404).json({ success: false, message: 'Notification not found.' });
   res.json({ success: true });
 });
 
 // ══════════════════════════════════════════════════════════════════
 // MESSAGES
 // ══════════════════════════════════════════════════════════════════
-app.get(['/api/messages', '/messages'], async (req, res) => {
-  const { userId1, userId2 } = req.query;
+app.get(['/api/messages', '/messages'], requireAuth, async (req, res) => {
+  // One side of the thread is always the caller, so nobody can read
+  // a conversation they are not part of (or dump the whole table).
+  const userId1 = req.user.UserID;
+  const { userId2 } = req.query;
   if (userId1 && userId2) {
     const { rows } = await q(
       `SELECT message_id AS "MessageID", sender_id AS "SenderID",
@@ -531,11 +677,17 @@ app.get(['/api/messages', '/messages'], async (req, res) => {
     );
     return res.json(rows);
   }
-  const { rows } = await q(`SELECT * FROM messages ORDER BY created_at ASC`);
+  const { rows } = await q(
+    `SELECT message_id AS "MessageID", sender_id AS "SenderID",
+            receiver_id AS "ReceiverID", item_id AS "ItemID",
+            message_text AS "MessageText", created_at AS "Timestamp"
+     FROM messages WHERE sender_id=$1 OR receiver_id=$1 ORDER BY created_at ASC`,
+    [userId1]
+  );
   res.json(rows);
 });
 
-app.post(['/api/messages', '/messages'], async (req, res) => {
+app.post(['/api/messages', '/messages'], requireAuth, async (req, res) => {
   const { SenderID, ReceiverID, ItemID, MessageText } = req.body;
   if (!SenderID || !ReceiverID || !MessageText)
     return res.status(400).json({ message: 'Sender, receiver, and message text required' });
@@ -569,11 +721,17 @@ app.post(['/api/messages', '/messages'], async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // ADMIN STATS
 // ══════════════════════════════════════════════════════════════════
-app.get(['/api/admin/stats', '/admin/stats'], async (_req, res) => {
+app.get(['/api/admin/stats', '/admin/stats'], requireAdmin, async (_req, res) => {
   try {
     const [lostRes, foundRes, claimsRes, usersRes] = await Promise.all([
-      q(`SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status='Claimed') AS claimed FROM lost_items`),
-      q(`SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status='Claimed') AS claimed FROM found_items`),
+      q(`SELECT COUNT(*) AS total,
+                COUNT(*) FILTER (WHERE status='Claimed')            AS claimed,
+                COUNT(*) FILTER (WHERE approval_status='Pending')   AS pending_approval
+         FROM lost_items`),
+      q(`SELECT COUNT(*) AS total,
+                COUNT(*) FILTER (WHERE status='Claimed')            AS claimed,
+                COUNT(*) FILTER (WHERE approval_status='Pending')   AS pending_approval
+         FROM found_items`),
       q(`SELECT COUNT(*) FILTER (WHERE status='Pending')  AS pending,
                 COUNT(*) FILTER (WHERE status='Approved') AS approved
          FROM claims`),
@@ -589,7 +747,9 @@ app.get(['/api/admin/stats', '/admin/stats'], async (_req, res) => {
     const totalUsers   = parseInt(usersRes.rows[0].total);
     const recoveryRate = totalLost > 0 ? Math.round((claimedLost / totalLost) * 100) : 0;
 
-    res.json({ totalLost, totalFound, claimedLost, claimedFound, pendingClaims: pending, approvedClaims: approved, totalUsers, recoveryRate });
+    const pendingReports = parseInt(lostRes.rows[0].pending_approval) + parseInt(foundRes.rows[0].pending_approval);
+
+    res.json({ totalLost, totalFound, claimedLost, claimedFound, pendingClaims: pending, approvedClaims: approved, pendingReports, totalUsers, recoveryRate });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
@@ -599,8 +759,8 @@ app.get(['/api/admin/stats', '/admin/stats'], async (_req, res) => {
 async function autoMatchNotify(type, itemId, reporterUserId) {
   try {
     const [lostRes, foundRes] = await Promise.all([
-      q(LOST_SELECT  + " WHERE l.status = 'Lost'"),
-      q(FOUND_SELECT + " WHERE f.status = 'Available'")
+      q(LOST_SELECT  + " WHERE l.status = 'Lost'      AND l.approval_status = 'Approved'"),
+      q(FOUND_SELECT + " WHERE f.status = 'Available' AND f.approval_status = 'Approved'")
     ]);
     const matches = getAllMatches(lostRes.rows, foundRes.rows).filter(m => m.matchScore >= 50);
 
