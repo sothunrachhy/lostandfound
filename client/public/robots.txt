@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# No sitemap yet — the app is a single-page, login-gated portal.
