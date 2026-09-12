@@ -11,6 +11,19 @@ import AdminProfileModal from './components/AdminProfileModal';
 import ConfirmModal from './components/ConfirmModal';
 import { setToken, clearToken, setUnauthorizedHandler } from './auth';
 import { usePolling } from './usePolling';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import NotFound from './pages/NotFound';
+
+// One source of truth for section names: used by the tab title and the
+// page header, so they can never disagree.
+const PAGE_TITLES = {
+  dashboard: 'Dashboard',
+  claims: 'Claims Verification',
+  reports: 'Report Moderation',
+  messages: 'Live Student Messaging',
+  users: 'User Management',
+  settings: 'System Settings',
+};
 
 let rawAPI = import.meta.env.VITE_API_BASE_URL || 'https://lostandfound-two-lovat.vercel.app';
 if (rawAPI && !rawAPI.startsWith('http://') && !rawAPI.startsWith('https://')) {
@@ -23,7 +36,10 @@ export default function App() {
     const s = localStorage.getItem('lf_admin');
     return s ? JSON.parse(s) : null;
   });
-  const [activePage,  setActivePage]  = useState('dashboard');
+  // The URL is the source of truth for which view is showing, so the back
+  // button, deep links and bookmarks all work.
+  const location = useLocation();
+  const activePage = location.pathname.split('/')[1] || 'dashboard';
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [logoutConfirmModal, setLogoutConfirmModal] = useState({ isOpen: false, title: '', message: '', confirmText: 'Sign Out', onConfirm: () => {} });
   const [modalNotify, setModalNotify] = useState({ isOpen: false, title: '', message: '', type: 'success' });
@@ -63,16 +79,8 @@ export default function App() {
 
   // The browser tab should name the view you are on, not just the app.
   React.useEffect(() => {
-    const titles = {
-      dashboard: 'Dashboard',
-      claims:    'Claims Verification',
-      reports:   'Report Moderation',
-      messages:  'Live Messaging',
-      users:     'User Management',
-      settings:  'System Settings',
-    };
     document.title = currentAdmin
-      ? `${titles[activePage] || 'Admin'} — LF System`
+      ? `${PAGE_TITLES[activePage] || 'Not Found'} — LF System`
       : 'LF System — Admin Control Center';
   }, [activePage, currentAdmin]);
 
@@ -284,7 +292,7 @@ export default function App() {
 
   return (
     <div className="admin-shell">
-      <AdminNavbar currentAdmin={currentAdmin} activePage={activePage} setActivePage={setActivePage}
+      <AdminNavbar currentAdmin={currentAdmin} activePage={activePage}
         pendingClaims={pendingClaims} onLogout={promptLogout} onRefresh={fetchData}
         onOpenProfile={() => setIsProfileOpen(true)} />
 
@@ -293,12 +301,7 @@ export default function App() {
         <div className="admin-topbar">
           <div>
             <h1 className="text-base font-bold text-slate-800">
-              {activePage === 'dashboard' && 'Dashboard'}
-              {activePage === 'claims'    && 'Claims Verification'}
-              {activePage === 'reports'   && 'Report Moderation'}
-              {activePage === 'messages'  && 'Live Student Messaging'}
-              {activePage === 'users'     && 'User Management'}
-              {activePage === 'settings'  && 'System Settings'}
+              {PAGE_TITLES[activePage] || 'Page Not Found'}
             </h1>
             <p className="text-[11px] text-slate-400 mt-0.5">LF System · Admin Control Center</p>
           </div>
@@ -306,23 +309,37 @@ export default function App() {
 
         {/* Page content */}
         <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
-          {activePage === 'dashboard' && <Dashboard stats={stats} lostItems={lostItems} foundItems={foundItems} claims={claims} categories={categories} locations={locations} />}
-          {activePage === 'claims'    && <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} onDeleteClaim={handleDeleteClaim} />}
-          {activePage === 'reports'   && <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} onSetApproval={handleSetApproval} />}
-          {activePage === 'messages'  && <MessagesPage currentAdmin={currentAdmin} users={users} API={API} onRefresh={fetchData} />}
-          {activePage === 'users'     && <UsersPage users={users} onDeleteUser={handleDeleteUser} onCreateAdmin={handleCreateAdmin} onUpdateUserRole={handleUpdateUserRole} />}
-          {activePage === 'settings'  && (
-            <SettingsPage
-              categories={categories}
-              locations={locations}
-              onAddCategory={handleAddCategory}
-              onUpdateCategory={handleUpdateCategory}
-              onDeleteCategory={handleDeleteCategory}
-              onAddLocation={handleAddLocation}
-              onUpdateLocation={handleUpdateLocation}
-              onDeleteLocation={handleDeleteLocation}
-            />
-          )}
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={
+              <Dashboard stats={stats} lostItems={lostItems} foundItems={foundItems} claims={claims} categories={categories} locations={locations} />
+            } />
+            <Route path="/claims" element={
+              <ClaimsPage claims={claims} onUpdateClaim={handleUpdateClaim} onDeleteClaim={handleDeleteClaim} />
+            } />
+            <Route path="/reports" element={
+              <ReportsPage lostItems={lostItems} foundItems={foundItems} onDeleteReport={handleDeleteReport} onSetApproval={handleSetApproval} />
+            } />
+            <Route path="/messages" element={
+              <MessagesPage currentAdmin={currentAdmin} users={users} API={API} onRefresh={fetchData} />
+            } />
+            <Route path="/users" element={
+              <UsersPage users={users} onDeleteUser={handleDeleteUser} onCreateAdmin={handleCreateAdmin} onUpdateUserRole={handleUpdateUserRole} />
+            } />
+            <Route path="/settings" element={
+              <SettingsPage
+                categories={categories}
+                locations={locations}
+                onAddCategory={handleAddCategory}
+                onUpdateCategory={handleUpdateCategory}
+                onDeleteCategory={handleDeleteCategory}
+                onAddLocation={handleAddLocation}
+                onUpdateLocation={handleUpdateLocation}
+                onDeleteLocation={handleDeleteLocation}
+              />
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </main>
       </div>
 

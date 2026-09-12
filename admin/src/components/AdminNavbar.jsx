@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom';
 import { Compass, ShieldCheck, LayoutDashboard, FileText, Users, Settings, MessageSquare, RefreshCw, LogOut } from 'lucide-react';
 
 const navItems = [
@@ -9,7 +10,7 @@ const navItems = [
   { id: 'settings',  label: 'Settings',   icon: Settings },
 ];
 
-export default function AdminNavbar({ currentAdmin, activePage, setActivePage, pendingClaims, onLogout, onRefresh, onOpenProfile }) {
+export default function AdminNavbar({ currentAdmin, pendingClaims, onLogout, onRefresh, onOpenProfile }) {
   return (
     <>
       {/* ── Sidebar (desktop) ──────────────────────── */}
@@ -31,8 +32,8 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
         <nav className="flex-1 p-3 space-y-1">
           <p className="section-label text-slate-400 px-3 py-2">Navigation</p>
           {navItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setActivePage(id)}
-              className={`nav-item w-full text-left ${activePage === id ? 'nav-item-active' : ''}`}>
+            <NavLink key={id} to={`/${id}`}
+              className={({ isActive }) => `nav-item w-full text-left ${isActive ? 'nav-item-active' : ''}`}>
               <Icon className="w-[18px] h-[18px] shrink-0" />
               <span className="flex-1">{label}</span>
               {id === 'claims' && pendingClaims > 0 && (
@@ -40,7 +41,7 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
                   {pendingClaims}
                 </span>
               )}
-            </button>
+            </NavLink>
           ))}
         </nav>
 
@@ -99,13 +100,13 @@ export default function AdminNavbar({ currentAdmin, activePage, setActivePage, p
         </div>
         <div className="flex overflow-x-auto gap-1 px-3 pb-2">
           {navItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setActivePage(id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap cursor-pointer transition-all shrink-0 ${
-                activePage === id ? 'bg-teal-700 text-white' : 'text-slate-500 bg-slate-100'
+            <NavLink key={id} to={`/${id}`}
+              className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap cursor-pointer transition-all shrink-0 ${
+                isActive ? 'bg-teal-700 text-white' : 'text-slate-500 bg-slate-100'
               }`}>
               <Icon className="w-3 h-3" />{label}
               {id === 'claims' && pendingClaims > 0 && <span className="bg-amber-400 text-slate-900 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">{pendingClaims}</span>}
-            </button>
+            </NavLink>
           ))}
         </div>
       </div>
