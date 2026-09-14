@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import {
   isTelegram, initData, telegramUser,
-  ready, applyTheme, onThemeChange, bindBackButton, haptic, notifyHaptic,
+  ready, applyTheme, onThemeChange, applyInsets, onInsetsChange,
+  bindBackButton, haptic, notifyHaptic,
 } from './telegram';
 import { setToken, clearToken, setUnauthorizedHandler } from './auth';
 import { translations, getCategoryName, getLocationName } from './translations';
@@ -30,7 +31,11 @@ export default function App() {
   useEffect(() => {
     ready();
     applyTheme();
-    return onThemeChange(applyTheme);
+    applyInsets();
+    const stopTheme = onThemeChange(applyTheme);
+    // Rotation, expand/collapse and fullscreen all move Telegram's controls.
+    const stopInsets = onInsetsChange(applyInsets);
+    return () => { stopTheme(); stopInsets(); };
   }, []);
 
   useEffect(() => {
@@ -412,7 +417,7 @@ function Board({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10">
+      <header className="tg-safe-top bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <BrandMark size={34} />

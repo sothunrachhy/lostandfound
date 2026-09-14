@@ -78,6 +78,42 @@ export function applyTheme() {
   root.dataset.theme = dark ? 'dark' : 'light';
 }
 
+/**
+ * Telegram draws its own Close / menu controls *over* the page when the app
+ * is expanded, so content at the top would sit underneath them. Bot API 8.0
+ * reports that band as contentSafeAreaInset, separately from the device notch
+ * (safeAreaInset). Publish the sum as CSS variables so the layout can clear
+ * both.
+ *
+ * Older clients expose neither and reserve the space themselves, so falling
+ * back to 0 is correct rather than guessing a height.
+ */
+export function applyInsets() {
+  const root = document.documentElement;
+  const safe = tg?.safeAreaInset || {};
+  const content = tg?.contentSafeAreaInset || {};
+
+  const px = (n) => `${Math.max(0, Number(n) || 0)}px`;
+
+  root.style.setProperty('--tg-inset-top', px((safe.top || 0) + (content.top || 0)));
+  root.style.setProperty('--tg-inset-bottom', px((safe.bottom || 0) + (content.bottom || 0)));
+  root.style.setProperty('--tg-inset-left', px(safe.left || 0));
+  root.style.setProperty('--tg-inset-right', px(safe.right || 0));
+}
+
+export function onInsetsChange(handler) {
+  if (!tg) return () => {};
+  // Both fire on rotation, expand/collapse and fullscreen toggles.
+  tg.onEvent('safeAreaChanged', handler);
+  tg.onEvent('contentSafeAreaChanged', handler);
+  tg.onEvent('viewportChanged', handler);
+  return () => {
+    tg.offEvent('safeAreaChanged', handler);
+    tg.offEvent('contentSafeAreaChanged', handler);
+    tg.offEvent('viewportChanged', handler);
+  };
+}
+
 export function onThemeChange(handler) {
   if (!tg) return () => {};
   tg.onEvent('themeChanged', handler);

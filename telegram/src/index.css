@@ -11,6 +11,13 @@
     --font-body: 'Plus Jakarta Sans', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
     --teal: #0f766e;
     --teal-bg: #f0fdfa;
+
+    /* Filled in by applyInsets(); 0 until Telegram reports otherwise, which
+       is also the right value for clients that reserve the space themselves. */
+    --tg-inset-top: 0px;
+    --tg-inset-bottom: 0px;
+    --tg-inset-left: 0px;
+    --tg-inset-right: 0px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,8 +29,17 @@
     min-height: 100vh;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    /* Keep content clear of the notch and home indicator */
-    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    /* Sides and bottom only: the top is handled per sticky header, so those
+       stay flush with the top of the scroll area when scrolling. */
+    padding-left: max(var(--tg-inset-left), env(safe-area-inset-left));
+    padding-right: max(var(--tg-inset-right), env(safe-area-inset-right));
+    padding-bottom: max(var(--tg-inset-bottom), env(safe-area-inset-bottom));
+  }
+
+  /* Any bar pinned to the top pads itself past Telegram's controls, so its
+     content clears them both at rest and while scrolling. */
+  .tg-safe-top {
+    padding-top: max(var(--tg-inset-top), env(safe-area-inset-top));
   }
 
   h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); line-height: 1.2; }

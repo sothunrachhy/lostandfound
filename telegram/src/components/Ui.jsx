@@ -19,7 +19,7 @@ export function BrandMark({ size = 48 }) {
 /* ─── Screen header with a back affordance ───────────────────── */
 export function ScreenHeader({ title, onBack, action }) {
   return (
-    <header className="bg-white border-b border-slate-200 px-3 py-2.5 sticky top-0 z-10 flex items-center gap-2">
+    <header className="tg-safe-top bg-white border-b border-slate-200 px-3 py-2.5 sticky top-0 z-10 flex items-center gap-2">
       {onBack && (
         <button onClick={onBack} className="p-1.5 -ml-1 rounded-lg text-slate-500" aria-label="Back">
           <ChevronLeft className="w-5 h-5" />
