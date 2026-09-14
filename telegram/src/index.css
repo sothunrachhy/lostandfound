@@ -1,65 +1,133 @@
 @import "tailwindcss";
 
-/* Telegram supplies the palette as CSS variables on <html>; telegram.js fills
-   in any a client omits. Everything below reads from those, so the app always
-   matches the user's own Telegram theme instead of imposing one. */
-@theme {
-  --font-body: 'Plus Jakarta Sans', 'Kantumruy Pro', sans-serif;
+/* Ported from client/src/index.css so the mini app matches the web portal
+   exactly. That means a fixed light palette rather than Telegram's theme
+   variables — brand consistency was chosen over following the user's
+   Telegram dark mode. */
+
+@layer base {
+  :root {
+    --font-heading: 'Outfit', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
+    --font-body: 'Plus Jakarta Sans', 'Kantumruy Pro', 'Noto Sans Khmer', sans-serif;
+    --teal: #0f766e;
+    --teal-bg: #f0fdfa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: #f8fafc;
+    color: #0f172a;
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    /* Keep content clear of the notch and home indicator */
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+
+  h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); line-height: 1.2; }
 }
 
-html, body, #root {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-body);
-  background: var(--tg-theme-bg-color);
-  color: var(--tg-theme-text-color);
-  -webkit-font-smoothing: antialiased;
-  /* Respect the notch / home indicator on phones */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-           env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
-
-.tg-surface { background: var(--tg-theme-secondary-bg-color); }
-.tg-hint    { color: var(--tg-theme-hint-color); }
-.tg-link    { color: var(--tg-theme-link-color); }
-
-.tg-button {
-  background: var(--tg-theme-button-color);
-  color: var(--tg-theme-button-text-color);
-}
-.tg-button:disabled { opacity: .55; }
-
-.tg-input {
-  width: 100%;
-  background: var(--tg-theme-secondary-bg-color);
-  color: var(--tg-theme-text-color);
-  border: 1px solid color-mix(in srgb, var(--tg-theme-hint-color) 30%, transparent);
-  border-radius: .75rem;
-  padding: .7rem .85rem;
-  font-size: .875rem;
-  outline: none;
-}
-.tg-input:focus { border-color: var(--tg-theme-link-color); }
-.tg-input::placeholder { color: var(--tg-theme-hint-color); }
-
-.tg-card {
-  background: var(--tg-theme-secondary-bg-color);
-  border-radius: 1rem;
+/* ── Cards ───────────────────────────────────── */
+.item-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+  transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
 }
+/* Touch devices have no hover, so the press state carries the feedback */
+.item-card:active { transform: scale(.985); box-shadow: 0 1px 4px rgba(0, 0, 0, .08); }
+.item-card-lost:active  { border-color: #fca5a5; }
+.item-card-found:active { border-color: #6ee7b7; }
 
-/* Chips read as badges in both themes without hardcoding a background */
-.chip {
-  font-size: 10px;
+/* ── Tabs ────────────────────────────────────── */
+.tab-btn {
+  padding: .45rem 1.1rem;
+  border-radius: .75rem;
+  font-size: .75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .18s ease;
+  white-space: nowrap;
+  border: 1.5px solid transparent;
+}
+.tab-btn-active-all   { background: #0f766e; color: #fff; border-color: #0f766e; }
+.tab-btn-active-lost  { background: #fff1f2; color: #be123c; border-color: #fda4af; }
+.tab-btn-active-found { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+.tab-btn-idle { background: #fff; color: #64748b; border-color: #e2e8f0; }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  background: #0f766e; color: #fff; font-weight: 700;
+  border: none; cursor: pointer;
+  transition: background .18s ease, transform .15s ease;
+}
+.btn-primary:active { background: #0d6b64; transform: scale(.99); }
+.btn-primary:disabled { opacity: .6; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  background: #f1f5f9; color: #475569; font-weight: 700;
+  border: none; cursor: pointer;
+  transition: background .18s ease;
+}
+.btn-ghost:active { background: #e2e8f0; }
+
+/* ── Forms ───────────────────────────────────── */
+.input-field {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: .75rem;
+  padding: .6rem .9rem;
+  color: #0f172a;
+  font-size: .8125rem;
+  outline: none;
+  font-family: var(--font-body);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.input-field:focus { border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, .12); }
+.input-field::placeholder { color: #94a3b8; }
+.input-field-search { padding-left: 2.75rem !important; }
+
+/* ── Badges ──────────────────────────────────── */
+.badge-lost      { background: #ef4444; color: #fff; }
+.badge-found     { background: #16a34a; color: #fff; }
+.badge-claimed   { background: #d97706; color: #fff; }
+.badge-available { background: #0f766e; color: #fff; }
+.badge-pending   { background: #f59e0b; color: #fff; }
+
+/* ── Section label ───────────────────────────── */
+.section-label {
+  font-size: .6875rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: .03em;
-  padding: .15rem .5rem;
-  border-radius: .5rem;
+  letter-spacing: .06em;
 }
 
-@keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.fade-up { animation: fade-up .25s ease both; }
+/* ── Motion ──────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.fade-up { animation: fade-up .3s ease both; }
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .skeleton { animation: none; }
+}
