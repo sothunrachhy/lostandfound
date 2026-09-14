@@ -7,10 +7,38 @@ const { uploadImage }  = require('./storage');
 const {
   hashPassword, verifyPassword, signToken, requireAuth, requireAdmin
 } = require('./auth');
-const { verifyInitData } = require('./telegram');
+const { verifyInitData, sendBotMessage } = require('./telegram');
 
 // verifyInitData throws when TELEGRAM_BOT_TOKEN is unset, which is a
 // deployment problem rather than a bad request. Turn that into a clear 503.
+/**
+ * Records a notification and, if the recipient has linked Telegram, pushes it
+ * to their chat with the bot.
+ *
+ * The database row is the source of truth; the push is a convenience, so it is
+ * fire-and-forget. A Telegram outage, or somebody who never pressed /start,
+ * must not slow down or fail the request that triggered the notification.
+ */
+async function notifyUser(userId, message, type = 'General') {
+  if (!userId || !message) return;
+
+  await q('INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,$3)',
+    [userId, message, type]);
+
+  // Deliberately not awaited — the caller must not wait on Telegram.
+  (async () => {
+    try {
+      const { rows } = await q('SELECT telegram_id FROM users WHERE user_id = $1', [userId]);
+      const chatId = rows[0] && rows[0].telegram_id;
+      if (!chatId) return;
+      const result = await sendBotMessage(chatId, 'LF System\n\n' + message);
+      if (!result.ok) console.warn('Telegram push skipped:', result.reason);
+    } catch (e) {
+      console.warn('Telegram push failed:', e.message);
+    }
+  })();
+}
+
 function checkTelegram(initData, res) {
   try {
     return verifyInitData(initData);
@@ -600,8 +628,7 @@ async function setApproval(kind, req, res) {
       ? `Your ${label} report "${row.item_name}" was approved and is now visible on the campus board.`
       : `Your ${label} report "${row.item_name}" was not approved by an administrator.`;
 
-    await q(`INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Report')`,
-      [row.user_id, message]);
+    await notifyUser(row.user_id, message, 'Report');
 
     // Only now does the report take part in matching.
     if (approval === 'Approved') await autoMatchNotify(kind, row.id, row.user_id);
@@ -665,10 +692,9 @@ app.post(['/api/claims', '/claims'], requireAuth, async (req, res) => {
 
     // Notify finder
     if (FinderID) {
-      await q(
-        `INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Claim')`,
-        [FinderID, `New ownership claim submitted for Found Item #${FoundID}. Please await admin review.`]
-      );
+      await notifyUser(FinderID,
+        `New ownership claim submitted for Found Item #${FoundID}. Please await admin review.`,
+        'Claim');
     }
 
     res.json({ success: true, message: 'Claim submitted!', claim: rows[0] });
@@ -692,10 +718,9 @@ app.put(['/api/claims/:id/status', '/claims/:id/status'], requireAdmin, async (r
       if (claim.lost_id)  await q(`UPDATE lost_items  SET status='Claimed' WHERE lost_id=$1`,  [claim.lost_id]);
 
       // Notify owner
-      await q(
-        `INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Approval')`,
-        [claim.owner_id, `Your ownership claim for Found Item #${claim.found_id} has been approved by Campus Safety!`]
-      );
+      await notifyUser(claim.owner_id,
+        `Your ownership claim for Found Item #${claim.found_id} has been approved by Campus Safety!`,
+        'Approval');
     }
 
     res.json({ success: true, message: `Claim ${status}` });
@@ -730,10 +755,9 @@ app.post(['/api/claims/approve-direct', '/claims/approve-direct'], requireAuth, 
       await q(`UPDATE claims SET status='Approved' WHERE found_id=$1 AND owner_id=$2`, [foundId, ownerId]);
     }
     if (ownerId) {
-      await q(
-        `INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Approval')`,
-        [ownerId, `Your item claim has been approved by the finder! The item is now marked as returned.`]
-      );
+      await notifyUser(ownerId,
+        'Your item claim has been approved by the finder! The item is now marked as returned.',
+        'Approval');
     }
     res.json({ success: true, message: 'Item marked as returned successfully!' });
   } catch (e) { res.status(500).json({ message: e.message }); }
@@ -816,10 +840,9 @@ app.post(['/api/messages', '/messages'], requireAuth, async (req, res) => {
     const senderName = senderRes.rows[0]?.name || 'Campus Member';
     const preview = MessageText.length > 50 ? MessageText.substring(0, 50) + '...' : MessageText;
 
-    await q(
-      `INSERT INTO notifications (user_id, message, type) VALUES ($1, $2, 'Message')`,
-      [ReceiverID, `💬 New message from ${senderName}: "${preview}"`]
-    );
+    await notifyUser(ReceiverID,
+      `💬 New message from ${senderName}: "${preview}"`,
+      'Message');
 
     res.json({ success: true, message: rows[0] });
   } catch (e) {
@@ -875,12 +898,14 @@ async function autoMatchNotify(type, itemId, reporterUserId) {
 
     for (const match of matches) {
       if (type === 'lost'  && match.lostItem.LostID   === itemId) {
-        await q(`INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Match')`,
-          [reporterUserId, `Match found! Your lost "${match.lostItem.ItemName}" matches a found item with ${match.matchScore}% confidence.`]);
+        await notifyUser(reporterUserId,
+          `Match found! Your lost "${match.lostItem.ItemName}" matches a found item with ${match.matchScore}% confidence.`,
+          'Match');
       }
       if (type === 'found' && match.foundItem.FoundID === itemId) {
-        await q(`INSERT INTO notifications (user_id, message, type) VALUES ($1,$2,'Match')`,
-          [match.lostItem.UserID, `Match found! Someone turned in "${match.foundItem.ItemName}" that matches your lost item (${match.matchScore}% match).`]);
+        await notifyUser(match.lostItem.UserID,
+          `Match found! Someone turned in "${match.foundItem.ItemName}" that matches your lost item (${match.matchScore}% match).`,
+          'Match');
       }
     }
   } catch (e) {

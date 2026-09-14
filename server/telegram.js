@@ -77,3 +77,63 @@ function verifyInitData(initData, { maxAgeSeconds = MAX_AGE_SECONDS } = {}) {
 }
 
 module.exports = { verifyInitData, MAX_AGE_SECONDS };
+
+/* ══════════════════════════════════════════════════════════════
+   Outbound: pushing notifications into the Telegram chat
+   ══════════════════════════════════════════════════════════════ */
+
+// Telegram rejects anything longer than this.
+const MAX_MESSAGE_LENGTH = 4096;
+
+/**
+ * Sends a plain-text message from the bot to one chat.
+ *
+ * Deliberately no parse_mode: message bodies contain user-supplied text, and
+ * a stray underscore or asterisk would either break the send or let someone
+ * inject formatting into a message that looks system-generated.
+ *
+ * Never throws. A push failing must not fail the request that triggered it —
+ * the in-app notification is the source of truth, this is a convenience.
+ *
+ * @returns {Promise<{ok: boolean, reason?: string}>}
+ */
+async function sendBotMessage(chatId, text) {
+  if (!chatId || !text) return { ok: false, reason: 'missing chat id or text' };
+
+  let token;
+  try {
+    token = botToken();
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+
+  const body = text.length > MAX_MESSAGE_LENGTH
+    ? text.slice(0, MAX_MESSAGE_LENGTH - 1) + '…'
+    : text;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: String(chatId),
+        text: body,
+        disable_web_page_preview: true,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!data.ok) {
+      // 403 means the person has not started the bot, or blocked it. That is
+      // normal and not worth shouting about.
+      const reason = data.description || `HTTP ${res.status}`;
+      return { ok: false, reason };
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+}
+
+module.exports.sendBotMessage = sendBotMessage;
+module.exports.MAX_MESSAGE_LENGTH = MAX_MESSAGE_LENGTH;

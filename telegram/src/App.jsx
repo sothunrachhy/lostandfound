@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Search, MapPin, Calendar, Package, Tag, ShieldCheck, AlertCircle, CheckCircle,
-  RefreshCw, Bell, User, Plus, Trash2, Globe,
+  RefreshCw, Bell, User, Plus, Trash2, Globe, MessageSquare,
 } from 'lucide-react';
 import {
   isTelegram, initData, telegramUser,
@@ -15,6 +15,7 @@ import {
 import ReportForm from './views/ReportForm';
 import ClaimForm from './views/ClaimForm';
 import Notifications from './views/Notifications';
+import Chat from './views/Chat';
 
 const API = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 const LANGS = [
@@ -196,18 +197,20 @@ function Shell({ user, onSignOut }) {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [toast, setToast] = useState(null);
 
   const load = useCallback(async () => {
     try {
-      const [l, f, c, loc, n] = await Promise.all([
+      const [l, f, c, loc, n, u] = await Promise.all([
         fetch(`${API}/api/lost-items`).then((r) => r.json()),
         fetch(`${API}/api/found-items`).then((r) => r.json()),
         fetch(`${API}/api/categories`).then((r) => r.json()),
         fetch(`${API}/api/locations`).then((r) => r.json()),
         fetch(`${API}/api/notifications`).then((r) => r.json()),
+        fetch(`${API}/api/users`).then((r) => r.json()),
       ]);
       const list = (v) => (Array.isArray(v) ? v : []);
       setLostItems(list(l));
@@ -215,13 +218,14 @@ function Shell({ user, onSignOut }) {
       setCategories(list(c));
       setLocations(list(loc));
       setNotifications(list(n));
+      setContacts(list(u).filter((x) => x.UserID !== user?.UserID));
       setFailed(false);
     } catch {
       setFailed(true);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.UserID]);
 
   // Fetching on mount is what effects are for; the rule cannot see that every
   // setState in load() happens after an await.
@@ -322,6 +326,16 @@ function Shell({ user, onSignOut }) {
     );
   }
 
+  if (view.name === 'chat') {
+    return (
+      <Chat
+        API={API} currentUser={user} contacts={contacts} t={t}
+        initialRecipient={view.recipient}
+        onBack={() => setView({ name: 'board' })}
+      />
+    );
+  }
+
   if (view.name === 'notifications') {
     return (
       <Notifications notifications={notifications} onMarkRead={markRead}
@@ -342,6 +356,10 @@ function Shell({ user, onSignOut }) {
         item={view.item} kind={view.kind} user={user} lang={lang}
         onBack={() => setView({ name: 'board' })}
         onClaim={() => setView({ name: 'claim', item: view.item })}
+        onMessage={() => setView({
+          name: 'chat',
+          recipient: contacts.find((c) => c.UserID === view.item.UserID) || null,
+        })}
         onDelete={() => deleteReport(view.kind, view.kind === 'lost' ? view.item.LostID : view.item.FoundID)}
         onMarkReturned={() => markReturned(view.item)}
       />
@@ -356,6 +374,7 @@ function Shell({ user, onSignOut }) {
       onRetry={load}
       onOpen={(item, kind) => { haptic(); setView({ name: 'detail', item, kind }); }}
       onReport={(mode) => { haptic(); setView({ name: 'report', mode }); }}
+      onChat={() => { haptic(); setView({ name: 'chat' }); }}
       onNotifications={() => { haptic(); setView({ name: 'notifications' }); }}
       onProfile={() => { haptic(); setView({ name: 'profile' }); }}
     />
@@ -365,7 +384,7 @@ function Shell({ user, onSignOut }) {
 /* ─── Board ──────────────────────────────────────────────────── */
 function Board({
   user, t, lostItems, foundItems, loading, failed, unread, toast,
-  onRetry, onOpen, onReport, onNotifications, onProfile,
+  onRetry, onOpen, onReport, onChat, onNotifications, onProfile,
 }) {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
@@ -403,6 +422,9 @@ function Board({
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            <button onClick={onChat} className="p-2 rounded-xl text-slate-500" aria-label="Messages">
+              <MessageSquare className="w-5 h-5" />
+            </button>
             <button onClick={onNotifications} className="relative p-2 rounded-xl text-slate-500" aria-label="Notifications">
               <Bell className="w-5 h-5" />
               {unread > 0 && (
@@ -516,7 +538,7 @@ function Board({
 }
 
 /* ─── Item detail ────────────────────────────────────────────── */
-function ItemDetail({ item, kind, user, lang, onBack, onClaim, onDelete, onMarkReturned }) {
+function ItemDetail({ item, kind, user, lang, onBack, onClaim, onMessage, onDelete, onMarkReturned }) {
   const lost = kind === 'lost';
   const isMine = item.UserID === user?.UserID;
   const claimable = !lost && !isMine && item.Status !== 'Claimed' && item.ApprovalStatus === 'Approved';
@@ -605,13 +627,10 @@ function ItemDetail({ item, kind, user, lang, onBack, onClaim, onDelete, onMarkR
         )}
 
         {!isMine && (
-          <div className="bg-teal-50 border border-teal-200 rounded-2xl p-3.5 flex gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-teal-900 leading-relaxed">
-              To message the person who reported this, open the full LF System
-              portal — conversations live there.
-            </p>
-          </div>
+          <button onClick={onMessage} className="btn-ghost w-full py-2.5 rounded-xl text-xs">
+            <MessageSquare className="w-4 h-4" />
+            Message {item.OwnerName?.split(' ')[0] || 'them'}
+          </button>
         )}
       </div>
     </div>
