@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+/* Telegram supplies the palette as CSS variables on <html>; telegram.js fills
+   in any a client omits. Everything below reads from those, so the app always
+   matches the user's own Telegram theme instead of imposing one. */
+@theme {
+  --font-body: 'Plus Jakarta Sans', 'Kantumruy Pro', sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+  -webkit-font-smoothing: antialiased;
+  /* Respect the notch / home indicator on phones */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.tg-surface { background: var(--tg-theme-secondary-bg-color); }
+.tg-hint    { color: var(--tg-theme-hint-color); }
+.tg-link    { color: var(--tg-theme-link-color); }
+
+.tg-button {
+  background: var(--tg-theme-button-color);
+  color: var(--tg-theme-button-text-color);
+}
+.tg-button:disabled { opacity: .55; }
+
+.tg-input {
+  width: 100%;
+  background: var(--tg-theme-secondary-bg-color);
+  color: var(--tg-theme-text-color);
+  border: 1px solid color-mix(in srgb, var(--tg-theme-hint-color) 30%, transparent);
+  border-radius: .75rem;
+  padding: .7rem .85rem;
+  font-size: .875rem;
+  outline: none;
+}
+.tg-input:focus { border-color: var(--tg-theme-link-color); }
+.tg-input::placeholder { color: var(--tg-theme-hint-color); }
+
+.tg-card {
+  background: var(--tg-theme-secondary-bg-color);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* Chips read as badges in both themes without hardcoding a background */
+.chip {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  padding: .15rem .5rem;
+  border-radius: .5rem;
+}
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fade-up .25s ease both; }

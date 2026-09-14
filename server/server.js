@@ -7,6 +7,19 @@ const { uploadImage }  = require('./storage');
 const {
   hashPassword, verifyPassword, signToken, requireAuth, requireAdmin
 } = require('./auth');
+const { verifyInitData } = require('./telegram');
+
+// verifyInitData throws when TELEGRAM_BOT_TOKEN is unset, which is a
+// deployment problem rather than a bad request. Turn that into a clear 503.
+function checkTelegram(initData, res) {
+  try {
+    return verifyInitData(initData);
+  } catch (e) {
+    res.status(503).json({ success: false, message: 'Telegram sign-in is not configured on this server.' });
+    console.error('Telegram verification unavailable:', e.message);
+    return null;
+  }
+}
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -121,6 +134,100 @@ app.post(['/api/admin/users', '/admin/users'], requireAdmin, async (req, res) =>
     if (e.code === '23505') return res.status(400).json({ success: false, message: 'Email already registered' });
     res.status(500).json({ message: e.message });
   }
+});
+
+// ══════════════════════════════════════════════════════════════════
+// TELEGRAM MINI APP
+//
+// Telegram accounts are linked to existing LF System users rather than
+// creating new ones, so the board stays limited to people who already have a
+// campus account. initData is signed by Telegram and verified against the
+// bot token on every request — it arrives from the browser and is never
+// trusted as sent.
+// ══════════════════════════════════════════════════════════════════
+
+// Silent sign-in: used on every open once the account has been linked.
+app.post(['/api/auth/telegram', '/auth/telegram'], async (req, res) => {
+  const check = checkTelegram(req.body.initData, res);
+  if (!check) return;
+  if (!check.ok) return res.status(401).json({ success: false, message: check.reason });
+
+  try {
+    const { rows } = await q(
+      `SELECT u.user_id, u.student_id, u.name, u.email, u.phone,
+              u.profile_image, r.role_id, r.role_name
+       FROM users u JOIN roles r USING (role_id)
+       WHERE u.telegram_id = $1`,
+      [check.user.id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        linked: false,
+        message: 'This Telegram account is not linked to an LF System account yet.',
+      });
+    }
+
+    const user = rows[0];
+    await q('UPDATE users SET last_active = NOW() WHERE user_id = $1', [user.user_id]);
+    user.is_online = true;
+    res.json({ success: true, linked: true, token: signToken(user), user: sanitizeUser(user) });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// One-time link: proves both the Telegram identity and the LF password.
+app.post(['/api/auth/telegram/link', '/auth/telegram/link'], async (req, res) => {
+  const { initData, email, password } = req.body;
+
+  const check = checkTelegram(initData, res);
+  if (!check) return;
+  if (!check.ok) return res.status(401).json({ success: false, message: check.reason });
+
+  try {
+    const { rows } = await q(
+      `SELECT u.user_id, u.student_id, u.name, u.email, u.phone,
+              u.profile_image, r.role_id, r.role_name, u.password, u.telegram_id
+       FROM users u JOIN roles r USING (role_id)
+       WHERE LOWER(u.email) = LOWER($1)`,
+      [email || '']
+    );
+
+    const user = rows[0];
+    const credentials = user ? await verifyPassword(password, user.password) : { ok: false };
+    if (!credentials.ok)
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+
+    if (credentials.needsUpgrade)
+      await q('UPDATE users SET password = $1 WHERE user_id = $2', [await hashPassword(password), user.user_id]);
+
+    // Already linked to a different Telegram account: refuse rather than
+    // silently moving the link and locking the first person out.
+    if (user.telegram_id && String(user.telegram_id) !== String(check.user.id))
+      return res.status(409).json({
+        success: false,
+        message: 'This account is already linked to a different Telegram account.',
+      });
+
+    try {
+      await q('UPDATE users SET telegram_id = $1, last_active = NOW() WHERE user_id = $2', [
+        check.user.id, user.user_id,
+      ]);
+    } catch (e) {
+      // Unique index: this Telegram account is linked to somebody else.
+      if (e.code === '23505')
+        return res.status(409).json({
+          success: false,
+          message: 'This Telegram account is already linked to another LF System account.',
+        });
+      throw e;
+    }
+
+    delete user.password;
+    delete user.telegram_id;
+    user.is_online = true;
+    res.json({ success: true, linked: true, token: signToken(user), user: sanitizeUser(user) });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.put(['/api/users/profile', '/users/profile'], requireAuth, async (req, res) => {

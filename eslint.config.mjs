@@ -13,7 +13,7 @@ export default [
 
   /* ── React portals ──────────────────────────────────────────── */
   {
-    files: ['client/src/**/*.{js,jsx}', 'admin/src/**/*.{js,jsx}'],
+    files: ['client/src/**/*.{js,jsx}', 'admin/src/**/*.{js,jsx}', 'telegram/src/**/*.{js,jsx}'],
     ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: 'latest',

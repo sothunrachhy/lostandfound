@@ -6,11 +6,11 @@
   "scripts": {
     "build:client": "npm run build --prefix client",
     "build:admin": "npm run build --prefix admin",
-    "build": "npm run build:client && npm run build:admin",
+    "build": "npm run build:client && npm run build:admin && npm run build:telegram",
     "dev:server": "node server/server.js",
     "dev:client": "npm run dev --prefix client",
     "dev:admin": "npm run dev --prefix admin",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\"",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:telegram\"",
     "start": "node server/server.js",
     "test": "node --test \"tests/**/*.test.js\"",
     "lint": "eslint .",
@@ -20,7 +20,10 @@
     "db:setup": "node server/scripts/setup.js",
     "db:hash-passwords": "node server/scripts/hashPasswords.js",
     "db:migrate-approval": "node server/scripts/migrateApproval.js",
-    "db:reset-password": "node server/scripts/resetPassword.js"
+    "db:reset-password": "node server/scripts/resetPassword.js",
+    "dev:telegram": "npm run dev --prefix telegram",
+    "build:telegram": "npm run build --prefix telegram",
+    "db:migrate-telegram": "node server/scripts/migrateTelegram.js"
   },
   "keywords": [],
   "author": "",
